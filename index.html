@@ -1,0 +1,2678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taha — Game Developer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #050c1a;
+      --grid:      rgba(30, 80, 140, 0.22);
+      --card-bg:   #0a1628;
+      --card-b:    #1e3a5a;
+      --orange:    #ff6b00;
+      --orange-d:  #cc5500;
+      --white:     #ffffff;
+      --muted:     #7a9cbd;
+      --muted2:    #3a5c7a;
+      --nav-h:     64px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ─── BOOT SCREEN ─── */
+    /* CSS-only fallback: auto-dismiss after 4.5s even if JavaScript is blocked */
+    @keyframes boot-force-hide {
+      to { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+    #boot {
+      position: fixed; inset: 0; z-index: 2000;
+      background: #020810;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      transition: opacity 0.7s ease;
+      animation: boot-force-hide 0.7s ease forwards 4.5s;
+    }
+    #boot.out { opacity: 0; pointer-events: none; animation: none; }
+
+    .boot-corners span {
+      position: fixed;
+      width: 22px; height: 22px;
+      border: 2px solid var(--orange);
+    }
+    .boot-corners span:nth-child(1) { top: 1.5rem; left: 1.5rem; border-right: none; border-bottom: none; }
+    .boot-corners span:nth-child(2) { top: 1.5rem; right: 1.5rem; border-left: none; border-bottom: none; }
+    .boot-corners span:nth-child(3) { bottom: 1.5rem; left: 1.5rem; border-right: none; border-top: none; }
+    .boot-corners span:nth-child(4) { bottom: 1.5rem; right: 1.5rem; border-left: none; border-top: none; }
+
+    .boot-name {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 900;
+      font-size: clamp(3rem, 10vw, 6rem);
+      letter-spacing: 0.12em;
+      color: var(--orange);
+      text-shadow: 0 0 60px rgba(255,107,0,0.4);
+    }
+    .boot-sub {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.45em;
+      color: var(--muted);
+      margin-top: 0.4rem;
+      margin-bottom: 2.5rem;
+    }
+    .boot-bar-wrap {
+      width: min(320px, 70vw);
+      height: 2px;
+      background: var(--card-b);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .boot-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--orange), #ff9d4d);
+      box-shadow: 0 0 8px rgba(255,107,0,0.7);
+      transition: width 0.12s linear;
+    }
+    .boot-status {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.25em;
+      color: var(--muted2);
+      height: 1em;
+    }
+
+    /* ─── CUSTOM CURSOR ─── */
+    @media (pointer: fine) {
+      body { cursor: none; }
+      a, button { cursor: none; }
+    }
+    #cursor {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      top: 0; left: 0;
+      transform: translate(-50%, -50%);
+      transition: transform 0.05s linear;
+    }
+    .c-cross {
+      position: relative;
+      width: 20px; height: 20px;
+    }
+    .c-cross::before, .c-cross::after {
+      content: '';
+      position: absolute;
+      background: var(--orange);
+      opacity: 0.9;
+    }
+    .c-cross::before { width: 1.5px; height: 100%; left: 50%; transform: translateX(-50%); }
+    .c-cross::after  { height: 1.5px; width: 100%; top: 50%; transform: translateY(-50%); }
+    .c-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px; height: 30px;
+      border: 1px solid rgba(255,107,0,0.35);
+      border-radius: 50%;
+      transition: width 0.2s, height 0.2s, border-color 0.2s;
+    }
+    #cursor.hover .c-ring {
+      width: 46px; height: 46px;
+      border-color: rgba(255,107,0,0.7);
+    }
+
+    /* ─── SCROLL PROGRESS ─── */
+    #scroll-progress {
+      position: fixed; top: 0; left: 0; z-index: 150;
+      height: 2px; width: 0%;
+      background: linear-gradient(90deg, var(--orange), #ff9d4d);
+      box-shadow: 0 0 6px rgba(255,107,0,0.6);
+      transition: width 0.08s linear;
+      pointer-events: none;
+    }
+
+    /* ─── HERO STATS ─── */
+    .hero-stats {
+      display: flex; flex-wrap: wrap;
+      gap: 0 1.8rem;
+      justify-content: center;
+      margin-top: 1.2rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 1.0s forwards;
+    }
+    .hero-stat {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+      color: var(--muted2);
+    }
+    .hero-stat strong { color: var(--orange); }
+
+    /* ─── NAV BADGE ─── */
+    .nav-badge {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.5rem;
+      letter-spacing: 0.1em;
+      padding: 0.22rem 0.6rem;
+      background: rgba(0,200,120,0.08);
+      color: #3ecf8e;
+      border: 1px solid rgba(0,200,120,0.3);
+      border-radius: 2px;
+      white-space: nowrap;
+      animation: wipPulse 3s ease-in-out infinite;
+    }
+
+    /* ─── GAME PLAY MODAL ─── */
+    .play-overlay {
+      position: fixed; inset: 0; z-index: 260;
+      background: rgba(2, 6, 14, 0.98);
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .play-overlay.open { opacity: 1; pointer-events: all; }
+
+    .play-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--card-b);
+      flex-shrink: 0;
+    }
+    .play-title {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 700; font-size: 0.85rem;
+      letter-spacing: 0.08em;
+    }
+    .play-header-actions { display: flex; align-items: center; gap: 1rem; }
+    .play-itch {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.6rem; letter-spacing: 0.12em;
+      color: var(--orange); text-decoration: none;
+      border: 1px solid rgba(255,107,0,0.3);
+      padding: 0.35rem 0.8rem;
+      transition: background 0.2s;
+    }
+    .play-itch:hover { background: rgba(255,107,0,0.08); }
+    .play-close {
+      background: none; border: none; cursor: none;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.62rem; letter-spacing: 0.12em;
+      color: var(--muted); transition: color 0.2s;
+    }
+    .play-close:hover { color: var(--orange); }
+    .play-body {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+      position: relative;
+    }
+    .play-splash {
+      text-align: center; max-width: 500px;
+    }
+    .play-splash-cover {
+      width: 100%; max-height: 260px;
+      object-fit: cover;
+      border: 1px solid var(--card-b);
+      margin-bottom: 1.5rem;
+    }
+    .play-splash-title {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 900; font-size: 1.6rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+    .play-splash-sub {
+      font-size: 0.85rem; color: var(--muted);
+      line-height: 1.6; margin-bottom: 2rem;
+    }
+    .play-btn {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 700; font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      padding: 1rem 2.5rem;
+      background: var(--orange); color: #000;
+      text-decoration: none;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      transition: background 0.2s, transform 0.15s;
+    }
+    .play-btn:hover { background: var(--orange-d); transform: translateY(-2px); }
+
+    /* ─── MOBILE FIXES ─── */
+    @media (max-width: 500px) {
+      .hero-stats { gap: 0.4rem 1rem; }
+      .filter-bar { gap: 0.4rem; }
+      .filter-btn { font-size: 0.58rem; padding: 0.4rem 0.8rem; }
+      .contact-box { padding: 2rem 1.2rem; }
+      .gallery-main { padding: 0.5rem; }
+      .gallery-strip { padding: 0.5rem 0.5rem 1rem; }
+      .gallery-thumb { width: 52px; height: 36px; }
+      .modal-panel { clip-path: none; }
+      .modal-meta { flex-direction: column; gap: 0.5rem; }
+      .boot-name { letter-spacing: 0.06em; }
+    }
+
+    @media (max-width: 780px) {
+      .modal-overlay { padding: 70px 0.75rem 2rem; }
+      .progress-clips { grid-template-columns: 1fr; }
+    }
+
+    /* ─── GLITCH FILTER ANIMATIONS ─── */
+    @keyframes glitch-out {
+      0%   { opacity: 1;   transform: translateX(0)    scaleY(1);    filter: none; }
+      18%  { opacity: 1;   transform: translateX(-6px) scaleY(0.94); filter: brightness(1.3); }
+      36%  { opacity: 1;   transform: translateX(6px)  scaleY(1.04); }
+      55%  { opacity: 0.5; transform: translateX(-4px) scaleY(0.55); filter: brightness(1.8); }
+      80%  { opacity: 0.1; transform: translateX(8px)  scaleY(0.15); }
+      100% { opacity: 0;   transform: translateX(0)    scaleY(0);    filter: none; }
+    }
+    @keyframes glitch-in {
+      0%   { opacity: 0;   transform: translateX(-8px) scaleY(0);    filter: none; }
+      20%  { opacity: 0.3; transform: translateX(5px)  scaleY(0.25); filter: brightness(1.5); }
+      50%  { opacity: 0.7; transform: translateX(-3px) scaleY(0.82); filter: brightness(1.2); }
+      80%  { opacity: 0.9; transform: translateX(2px)  scaleY(1.03); filter: none; }
+      100% { opacity: 1;   transform: translateX(0)    scaleY(1); }
+    }
+    .card-glitch-out { animation: glitch-out 0.2s ease forwards; }
+    .card-glitch-in  { animation: glitch-in  0.26s ease forwards; }
+
+    /* ─── ACHIEVEMENT TOAST ─── */
+    #achievement-toast {
+      position: fixed; bottom: 1.8rem; right: 1.8rem; z-index: 500;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 0.6rem;
+      pointer-events: none;
+    }
+    .ach-toast {
+      background: rgba(5, 12, 26, 0.96);
+      border: 1px solid var(--card-b);
+      border-left: 3px solid var(--orange);
+      padding: 0.8rem 1.1rem;
+      min-width: 220px; max-width: 290px;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      opacity: 0;
+      transform: translateY(14px) scale(0.96);
+      transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      backdrop-filter: blur(8px);
+    }
+    .ach-toast.show { opacity: 1; transform: translateY(0) scale(1); }
+    .ach-label {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.48rem; letter-spacing: 0.3em;
+      color: var(--orange); margin-bottom: 0.3rem;
+    }
+    .ach-title {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 700; font-size: 0.72rem;
+      letter-spacing: 0.08em; color: var(--white);
+      margin-bottom: 0.2rem;
+    }
+    .ach-desc {
+      font-size: 0.72rem; color: var(--muted); line-height: 1.4;
+    }
+    .ach-bar {
+      height: 2px; background: var(--card-b); margin-top: 0.6rem; overflow: hidden;
+    }
+    .ach-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--orange), #ff9d4d);
+      width: 100%;
+      transition: width 3s linear;
+    }
+
+    /* ─── SOUND BUTTON ─── */
+    .sound-btn {
+      background: none; border: none; cursor: none;
+      color: var(--muted2);
+      display: flex; align-items: center;
+      padding: 0.3rem; transition: color 0.2s;
+      flex-shrink: 0;
+    }
+    .sound-btn:hover  { color: var(--muted); }
+    .sound-btn.active { color: var(--orange); }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--muted2); border-radius: 3px; }
+
+    /* ─── BLUEPRINT GRID ─── */
+    .bp-grid {
+      background-color: var(--bg);
+      background-image:
+        repeating-linear-gradient(0deg,   transparent, transparent 39px, var(--grid) 39px, var(--grid) 40px),
+        repeating-linear-gradient(90deg,  transparent, transparent 39px, var(--grid) 39px, var(--grid) 40px);
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem;
+      background: rgba(5, 12, 26, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-b);
+    }
+
+    .nav-logo {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 900;
+      font-size: 1.3rem;
+      letter-spacing: 0.15em;
+      color: var(--orange);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--white); }
+
+    .nav-links {
+      display: flex; gap: 2.2rem; list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.78rem;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute; bottom: -4px; left: 0;
+      width: 0; height: 1px;
+      background: var(--orange);
+      transition: width 0.25s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--orange); }
+    .nav-links a:hover::after,
+    .nav-links a.active::after { width: 100%; }
+
+    .nav-hamburger {
+      display: none;
+      flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none;
+    }
+    .nav-hamburger span {
+      display: block; width: 24px; height: 2px;
+      background: var(--muted);
+      transition: 0.3s;
+    }
+
+    /* mobile nav */
+    @media (max-width: 680px) {
+      .nav-links {
+        position: fixed; top: var(--nav-h); left: 0; right: 0;
+        flex-direction: column; gap: 0;
+        background: rgba(5, 12, 26, 0.97);
+        border-bottom: 1px solid var(--card-b);
+        transform: translateY(-110%);
+        transition: transform 0.3s ease;
+        padding: 1rem 0;
+      }
+      .nav-links.open { transform: translateY(0); }
+      .nav-links li { padding: 0.9rem 2.5rem; }
+      .nav-hamburger { display: flex; }
+    }
+
+    /* ─── HERO ─── */
+    #hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding-top: var(--nav-h);
+    }
+
+    .hero-nodes {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero-eyebrow {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--orange);
+      margin-bottom: 1.2rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.3s forwards;
+    }
+
+    .hero-name {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 900;
+      font-size: clamp(3.5rem, 12vw, 8rem);
+      line-height: 1;
+      letter-spacing: 0.06em;
+      color: var(--white);
+      text-shadow: 0 0 60px rgba(255,107,0,0.25);
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: clamp(0.65rem, 2vw, 0.9rem);
+      letter-spacing: 0.3em;
+      color: var(--muted);
+      margin-top: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.7s forwards;
+    }
+
+    .hero-chips {
+      display: flex; flex-wrap: wrap; gap: 0.6rem;
+      justify-content: center;
+      margin-top: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.9s forwards;
+    }
+
+    .chip {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--card-b);
+      border-radius: 2px;
+      color: var(--muted);
+      background: rgba(10, 22, 40, 0.7);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .chip:hover { border-color: var(--orange); color: var(--orange); }
+
+    .hero-cta {
+      margin-top: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 1.1s forwards;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      padding: 0.85rem 2rem;
+      background: var(--orange);
+      color: #000;
+      text-decoration: none;
+      border: none; cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { background: var(--orange-d); transform: translateY(-2px); }
+
+    .hero-scroll {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 1.4s forwards;
+    }
+    .hero-scroll span {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.3em;
+      color: var(--muted2);
+    }
+    .scroll-chevron {
+      width: 20px; height: 20px;
+      border-right: 2px solid var(--muted2);
+      border-bottom: 2px solid var(--muted2);
+      transform: rotate(45deg);
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); }
+      50%       { transform: rotate(45deg) translateY(5px); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── SECTION SHARED ─── */
+    section { padding: 6rem 2rem; }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-eyebrow {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      color: var(--orange);
+      margin-bottom: 0.6rem;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 700;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      letter-spacing: 0.05em;
+    }
+
+    .section-line {
+      width: 60px; height: 2px;
+      background: var(--orange);
+      margin: 1rem auto 0;
+    }
+
+    /* ─── PROJECTS ─── */
+    #projects { background: var(--bg); }
+
+    .filter-bar {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .filter-btn {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      padding: 0.5rem 1.2rem;
+      background: transparent;
+      border: 1px solid var(--card-b);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 2px;
+    }
+    .filter-btn:hover { border-color: var(--orange); color: var(--orange); }
+    .filter-btn.active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #000;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .project-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-b);
+      overflow: hidden;
+      transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.2s, opacity 0.3s;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    }
+    .project-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0 24px rgba(255, 107, 0, 0.18);
+      border-color: var(--orange);
+    }
+    .project-card.hidden {
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+    }
+
+    .card-thumb {
+      height: 170px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-thumb-icon {
+      font-size: 3rem;
+      opacity: 0.6;
+      z-index: 1;
+      position: relative;
+    }
+
+    .card-thumb-grid {
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg,   transparent, transparent 19px, rgba(255,255,255,0.04) 19px, rgba(255,255,255,0.04) 20px),
+        repeating-linear-gradient(90deg,  transparent, transparent 19px, rgba(255,255,255,0.04) 19px, rgba(255,255,255,0.04) 20px);
+    }
+
+    .card-body { padding: 1.2rem 1.4rem 1.4rem; }
+
+    .card-tags {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .tag {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 2px;
+    }
+
+    .tag-game-design   { background: rgba(255,107,0,0.12); color: #ff8c3a; border: 1px solid rgba(255,107,0,0.3); }
+    .tag-environment   { background: rgba(0,200,120,0.1);  color: #3ecf8e; border: 1px solid rgba(0,200,120,0.3); }
+    .tag-level-design  { background: rgba(90,160,255,0.1); color: #72b4ff; border: 1px solid rgba(90,160,255,0.3); }
+    .tag-technical     { background: rgba(200,100,255,0.1);color: #c87aff; border: 1px solid rgba(200,100,255,0.3); }
+
+    .card-title {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 1.1rem;
+    }
+
+    .card-link {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: var(--orange);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      transition: gap 0.2s;
+    }
+    .card-link:hover { gap: 0.7rem; }
+
+    /* ─── ABOUT ─── */
+    #about {
+      background: linear-gradient(180deg, var(--bg) 0%, #071020 100%);
+    }
+
+    .about-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    @media (max-width: 780px) {
+      .about-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+
+    .about-bio-label {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.3em;
+      color: var(--orange);
+      margin-bottom: 1rem;
+    }
+
+    .about-bio-title {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 700;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      line-height: 1.3;
+      margin-bottom: 1.2rem;
+    }
+
+    .about-bio-text {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    .about-connector {
+      display: none;
+    }
+
+    .skills-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      .skills-panels { grid-template-columns: 1fr; }
+    }
+
+    .skill-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-b);
+      padding: 1.3rem;
+      border-radius: 2px;
+      transition: border-color 0.2s;
+    }
+    .skill-panel:hover { border-color: var(--orange); }
+
+    .skill-icon { font-size: 1.6rem; margin-bottom: 0.7rem; }
+
+    .skill-name {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      color: var(--white);
+    }
+
+    .skill-bullets {
+      list-style: none;
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .skill-bullets li::before {
+      content: '▸ ';
+      color: var(--orange);
+    }
+
+    .skill-bar-wrap {
+      height: 3px;
+      background: var(--card-b);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .skill-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--orange), #ff9d4d);
+      border-radius: 2px;
+      width: 100%;
+      transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    .js .skill-bar { width: 0; }
+
+    /* ─── TOOLS SECTION ─── */
+    .tools-section {
+      max-width: 1100px;
+      margin: 2.5rem auto 0;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--card-b);
+    }
+
+    .tools-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      margin-top: 1.2rem;
+    }
+
+    .tools-group {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .tg-label {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.56rem;
+      letter-spacing: 0.2em;
+      color: var(--muted2);
+      white-space: nowrap;
+      min-width: 90px;
+      text-align: right;
+    }
+
+    .tg-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--card-b);
+      flex-shrink: 0;
+    }
+
+    .tools-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tool-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-b);
+      padding: 0.45rem 0.85rem;
+      cursor: default;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .tool-chip:hover {
+      border-color: var(--orange);
+      transform: translateY(-2px);
+    }
+    .tool-chip img {
+      width: 16px; height: 16px;
+      object-fit: contain;
+      filter: opacity(0.65);
+      transition: filter 0.2s;
+    }
+    .tool-chip:hover img { filter: opacity(1); }
+
+    .tool-chip span {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+    .tool-chip:hover span { color: var(--white); }
+
+    .tc-icon {
+      width: 16px; height: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.48rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--orange);
+      border: 1px solid rgba(255,107,0,0.5);
+      border-radius: 2px;
+      flex-shrink: 0;
+      opacity: 0.65;
+      transition: opacity 0.2s;
+    }
+    .tool-chip:hover .tc-icon { opacity: 1; }
+
+    @media (max-width: 680px) {
+      .tools-group { gap: 0.7rem; }
+      .tg-label { min-width: unset; text-align: left; width: 100%; }
+      .tg-divider { display: none; }
+    }
+
+    /* ─── CONTACT ─── */
+    #contact {
+      text-align: center;
+      padding-bottom: 5rem;
+    }
+
+    .contact-box {
+      max-width: 560px;
+      margin: 0 auto;
+      border: 1px solid var(--card-b);
+      padding: 3rem 2.5rem;
+      background: var(--card-bg);
+      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+      position: relative;
+    }
+
+    .contact-box::before,
+    .contact-box::after {
+      content: '';
+      position: absolute;
+      width: 12px; height: 12px;
+      border: 2px solid var(--orange);
+    }
+    .contact-box::before { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+    .contact-box::after  { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+    .contact-tagline {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .contact-email {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      color: var(--orange);
+      text-decoration: none;
+      border: 1px solid rgba(255,107,0,0.3);
+      padding: 0.7rem 1.5rem;
+      display: inline-block;
+      margin-bottom: 2rem;
+      transition: background 0.2s;
+    }
+    .contact-email:hover { background: rgba(255,107,0,0.08); }
+
+    .social-links {
+      display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap;
+    }
+
+    .social-link {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px solid var(--card-b);
+      padding: 0.55rem 1.1rem;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .social-link:hover { color: var(--orange); border-color: var(--orange); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      border-top: 1px solid var(--card-b);
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      color: var(--muted2);
+    }
+
+    /* ─── REVEAL ON SCROLL ─── */
+    /* Only hide when JS is running — progressive enhancement */
+    .js .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .js .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── CARD BADGE & CTA VARIANTS ─── */
+    .card-badge {
+      position: absolute; top: 10px; right: 10px;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 2px;
+      z-index: 2;
+    }
+    .badge-browser  { background: rgba(0,200,120,0.15); color: #3ecf8e; border: 1px solid rgba(0,200,120,0.4); }
+    .badge-download { background: rgba(90,160,255,0.12); color: #72b4ff; border: 1px solid rgba(90,160,255,0.35); }
+    .badge-wip      { background: rgba(255,107,0,0.15); color: var(--orange); border: 1px solid rgba(255,107,0,0.4);
+                      animation: wipPulse 2s ease-in-out infinite; }
+    @keyframes wipPulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
+    }
+
+    .card-link-modal {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: var(--orange);
+      background: none; border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0;
+      transition: gap 0.2s;
+    }
+    .card-link-modal:hover { gap: 0.7rem; }
+
+    /* ─── DETAIL MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(3, 8, 18, 0.92);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: flex-start; justify-content: center;
+      overflow-y: auto;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+      padding: 80px 1.5rem 3rem;
+    }
+    .modal-overlay.open {
+      opacity: 1; pointer-events: all;
+    }
+
+    .modal-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-b);
+      width: 100%; max-width: 860px;
+      position: relative;
+      clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+      transform: translateY(30px);
+      transition: transform 0.35s cubic-bezier(0.2,0,0,1);
+    }
+    .modal-overlay.open .modal-panel {
+      transform: translateY(0);
+    }
+
+    .modal-close {
+      position: absolute; top: 1rem; right: 1.2rem;
+      background: none; border: none; cursor: pointer;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      display: flex; align-items: center; gap: 0.4rem;
+      transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--orange); }
+
+    .modal-hero {
+      padding: 2.5rem 2.5rem 0;
+      border-bottom: 1px solid var(--card-b);
+      padding-bottom: 2rem;
+    }
+
+    .modal-eyebrow {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.35em;
+      color: var(--orange);
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-title {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 900;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.7rem;
+    }
+
+    .modal-subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 600px;
+      margin-bottom: 1.2rem;
+    }
+
+    .modal-meta {
+      display: flex; flex-wrap: wrap; gap: 1rem;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--muted2);
+    }
+    .modal-meta span { display: flex; align-items: center; gap: 0.4rem; }
+    .modal-meta strong { color: var(--muted); }
+
+    .modal-body {
+      padding: 2rem 2.5rem;
+      display: flex; flex-direction: column; gap: 2rem;
+    }
+
+    .modal-section-title {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 700;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--orange);
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .modal-section-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--card-b);
+    }
+
+    /* Screenshot gallery */
+    .modal-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .gallery-slot {
+      aspect-ratio: 16/9;
+      background: var(--bg);
+      border: 1px dashed var(--muted2);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.4rem;
+      color: var(--muted2);
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+    }
+    .gallery-slot svg { opacity: 0.4; }
+    .gallery-slot img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: none;
+    }
+    .gallery-slot.has-image img  { display: block; }
+    .gallery-slot.has-image span,
+    .gallery-slot.has-image svg  { display: none; }
+
+    /* Dev log */
+    .devlog-entries { display: flex; flex-direction: column; gap: 1rem; }
+
+    .devlog-entry {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0 1.2rem;
+    }
+    .devlog-date {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--orange);
+      padding-top: 0.1rem;
+      white-space: nowrap;
+    }
+    .devlog-text {
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.7;
+      border-left: 2px solid var(--card-b);
+      padding-left: 1rem;
+    }
+
+    /* Planned features */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.7rem;
+    }
+
+    .feature-item {
+      background: var(--bg);
+      border: 1px solid var(--card-b);
+      padding: 0.8rem 1rem;
+      display: flex; align-items: flex-start; gap: 0.6rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .feature-item .fi-check {
+      color: var(--orange);
+      font-size: 0.7rem;
+      margin-top: 0.15rem;
+      flex-shrink: 0;
+    }
+    .feature-item.done { border-color: rgba(0,200,120,0.3); }
+    .feature-item.done .fi-check { color: #3ecf8e; }
+
+    /* ─── PROGRESS CLIPS ─── */
+    .progress-clips {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    @media (max-width: 680px) {
+      .progress-clips { grid-template-columns: 1fr; }
+    }
+
+    .pclip { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .pclip-label {
+      display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    }
+
+    .pclip-tag {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.5rem;
+      letter-spacing: 0.1em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 2px;
+    }
+
+    .pclip-title {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.07em;
+      color: var(--white);
+    }
+
+    .pclip-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ─── MODAL VIDEO ─── */
+    .modal-video-wrap {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border: 1px solid var(--card-b);
+    }
+    .modal-video-wrap video {
+      width: 100%;
+      display: block;
+      max-height: 460px;
+      object-fit: contain;
+      background: #000;
+    }
+
+    @media (max-width: 600px) {
+      .modal-hero, .modal-body { padding-left: 1.2rem; padding-right: 1.2rem; }
+    }
+
+    /* ─── CARD IMAGE THUMB ─── */
+    .card-thumb { overflow: hidden; }
+    .card-thumb img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .project-card:hover .card-thumb img { transform: scale(1.05); }
+
+    .badge-art { background: rgba(0,200,120,0.15); color: #3ecf8e; border: 1px solid rgba(0,200,120,0.4); }
+
+    /* ─── GALLERY LIGHTBOX ─── */
+    .gallery-overlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(2, 6, 14, 0.96);
+      backdrop-filter: blur(10px);
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .gallery-overlay.open { opacity: 1; pointer-events: all; }
+
+    .gallery-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 2rem;
+      border-bottom: 1px solid var(--card-b);
+      flex-shrink: 0;
+    }
+
+    .gallery-project-name {
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+    }
+
+    .gallery-close {
+      background: none; border: none; cursor: pointer;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+    .gallery-close:hover { color: var(--orange); }
+
+    .gallery-main {
+      flex: 1; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem 2rem;
+      position: relative;
+    }
+
+    .gallery-main img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+      border: 1px solid var(--card-b);
+      transition: opacity 0.25s;
+    }
+
+    .gallery-nav {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      background: rgba(5,12,26,0.8);
+      border: 1px solid var(--card-b);
+      color: var(--muted);
+      font-size: 1.2rem;
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .gallery-nav:hover { border-color: var(--orange); color: var(--orange); }
+    .gallery-nav.prev { left: 0.5rem; }
+    .gallery-nav.next { right: 0.5rem; }
+    .gallery-nav:disabled { opacity: 0.2; pointer-events: none; }
+
+    .gallery-caption {
+      text-align: center;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .gallery-strip {
+      display: flex; gap: 0.5rem; justify-content: center;
+      padding: 0.8rem 2rem 1.2rem;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+
+    .gallery-thumb {
+      width: 64px; height: 44px;
+      object-fit: cover;
+      border: 1px solid var(--card-b);
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .gallery-thumb.active { opacity: 1; border-color: var(--orange); }
+  </style>
+</head>
+<body class="bp-grid">
+
+  <!-- SCROLL PROGRESS -->
+  <div id="scroll-progress"></div>
+
+  <!-- CUSTOM CURSOR -->
+  <div id="cursor">
+    <div class="c-ring"></div>
+    <div class="c-cross"></div>
+  </div>
+
+  <!-- BOOT SCREEN -->
+  <div id="boot">
+    <div class="boot-corners"><span></span><span></span><span></span><span></span></div>
+    <div class="boot-name">TAHA</div>
+    <div class="boot-sub">// PORTFOLIO 2026</div>
+    <div class="boot-bar-wrap"><div class="boot-bar" id="bootBar"></div></div>
+    <div class="boot-status" id="bootStatus">LOADING ASSETS...</div>
+  </div>
+
+  <!-- GAME PLAY MODAL -->
+  <div class="play-overlay" id="playOverlay">
+    <div class="play-header">
+      <span class="play-title" id="playTitle"></span>
+      <div class="play-header-actions">
+        <a class="play-itch" id="playItchLink" href="#" target="_blank" rel="noopener">OPEN ON ITCH.IO ↗</a>
+        <button class="play-close" id="playClose">[ CLOSE ✕ ]</button>
+      </div>
+    </div>
+    <div class="play-body">
+      <div class="play-splash">
+        <img class="play-splash-cover" id="playCover" src="" alt="">
+        <div class="play-splash-title" id="playSplashTitle"></div>
+        <p class="play-splash-sub" id="playSplashSub"></p>
+        <a class="play-btn" id="playBtn" href="#" target="_blank" rel="noopener">
+          ▶ &nbsp;PLAY IN BROWSER
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <a href="#hero" class="nav-logo">T<span>AHA</span></a>
+    <span class="nav-badge">AVAILABLE FOR WORK</span>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button id="sound-btn" class="sound-btn" title="Toggle sound" aria-label="Toggle sound">
+      <svg id="sound-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+        <path class="sound-wave sound-wave-1" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        <path class="sound-wave sound-wave-2" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+        <line class="sound-off-line" x1="23" y1="9" x2="17" y2="15" style="display:none"></line>
+        <line class="sound-off-line" x1="17" y1="9" x2="23" y2="15" style="display:none"></line>
+      </svg>
+    </button>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <!-- Animated nodes -->
+    <svg class="hero-nodes" viewBox="0 0 1440 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <!-- Connection lines -->
+      <line x1="200" y1="150" x2="520" y2="300" stroke="rgba(255,107,0,0.18)" stroke-width="1" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="3s" repeatCount="indefinite"/>
+      </line>
+      <line x1="520" y1="300" x2="900" y2="200" stroke="rgba(90,160,255,0.15)" stroke-width="1" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="4s" repeatCount="indefinite"/>
+      </line>
+      <line x1="900" y1="200" x2="1240" y2="380" stroke="rgba(255,107,0,0.18)" stroke-width="1" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="3.5s" repeatCount="indefinite"/>
+      </line>
+      <line x1="520" y1="300" x2="700" y2="580" stroke="rgba(0,200,120,0.12)" stroke-width="1" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="5s" repeatCount="indefinite"/>
+      </line>
+      <line x1="700" y1="580" x2="1050" y2="620" stroke="rgba(200,100,255,0.12)" stroke-width="1" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="4.5s" repeatCount="indefinite"/>
+      </line>
+      <line x1="300" y1="500" x2="700" y2="580" stroke="rgba(90,160,255,0.12)" stroke-width="1" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="3.8s" repeatCount="indefinite"/>
+      </line>
+      <!-- Nodes -->
+      <circle cx="200"  cy="150" r="5" fill="none" stroke="rgba(255,107,0,0.5)" stroke-width="1.5">
+        <animate attributeName="r" values="5;7;5" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="520"  cy="300" r="6" fill="rgba(255,107,0,0.1)" stroke="rgba(255,107,0,0.6)" stroke-width="1.5">
+        <animate attributeName="r" values="6;9;6" dur="4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="4s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="900"  cy="200" r="5" fill="none" stroke="rgba(90,160,255,0.5)" stroke-width="1.5">
+        <animate attributeName="r" values="5;7;5" dur="3.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="3.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="1240" cy="380" r="5" fill="none" stroke="rgba(255,107,0,0.4)" stroke-width="1.5">
+        <animate attributeName="r" values="5;7;5" dur="2.8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="700"  cy="580" r="5" fill="none" stroke="rgba(0,200,120,0.4)" stroke-width="1.5">
+        <animate attributeName="r" values="5;8;5" dur="4.2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="300"  cy="500" r="4" fill="none" stroke="rgba(90,160,255,0.4)" stroke-width="1.5">
+        <animate attributeName="r" values="4;6;4" dur="3.2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="1050" cy="620" r="4" fill="none" stroke="rgba(200,100,255,0.4)" stroke-width="1.5">
+        <animate attributeName="r" values="4;6;4" dur="5s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+
+    <div class="hero-content">
+      <p class="hero-eyebrow">// PORTFOLIO 2026</p>
+      <h1 class="hero-name">TAHA</h1>
+      <p class="hero-title">TECHNICAL ARTIST &nbsp;·&nbsp; DESIGNER &nbsp;·&nbsp; BRIDGE BUILDER</p>
+      <div class="hero-chips">
+        <span class="chip">Game Design</span>
+        <span class="chip">Environment Design</span>
+        <span class="chip">Level Design</span>
+        <span class="chip">Technical Art</span>
+      </div>
+      <div class="hero-stats">
+        <span class="hero-stat"><strong data-target="4">0</strong> SHIPPED GAMES</span>
+        <span class="hero-stat"><strong data-target="4">0</strong> SPECIALISATIONS</span>
+        <span class="hero-stat"><strong data-target="3">0</strong> ENGINES</span>
+        <span class="hero-stat"><strong data-target="1">0</strong> STEAM TITLE</span>
+      </div>
+      <div class="hero-cta">
+        <a href="#projects" class="btn-primary">VIEW PROJECTS &nbsp;→</a>
+      </div>
+    </div>
+
+    <div class="hero-scroll">
+      <span>SCROLL</span>
+      <div class="scroll-chevron"></div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">// WORK</p>
+      <h2 class="section-title">PROJECT SHOWCASE</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="filter-bar reveal">
+      <button class="filter-btn active" data-filter="all">ALL</button>
+      <button class="filter-btn" data-filter="game-design">Game Design</button>
+      <button class="filter-btn" data-filter="environment">Environment</button>
+      <button class="filter-btn" data-filter="level-design">Level Design</button>
+      <button class="filter-btn" data-filter="technical">Technical</button>
+    </div>
+
+    <div class="projects-grid" id="projectsGrid">
+
+      <div class="project-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#0a1a00 0%,#1a2e00 100%);position:relative;">
+          <img src="assets/Vile/Cover.png" alt="Vile" loading="lazy" onerror="this.style.display='none'">
+          <span class="card-badge badge-browser">BROWSER</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tags"><span class="tag tag-technical">Technical</span><span class="tag tag-level-design">Level Design</span><span class="tag tag-game-design">Game Design</span></div>
+          <div class="card-title">Vile<span style="display:block;font-size:0.65rem;font-weight:400;color:var(--muted);letter-spacing:0.08em;margin-top:0.2rem;">The Echoes of Hunt</span></div>
+          <p class="card-desc">A 2D survival platformer set in a hostile, overgrown world. Navigate escalating threats, manage scarce resources, and survive the echoes of something ancient.</p>
+          <div style="display:flex;gap:0.7rem;flex-wrap:wrap;">
+            <a class="card-link" href="https://nefer-owo7.itch.io/vile" target="_blank" rel="noopener" style="color:var(--orange)">▶ PLAY →</a>
+            <a class="card-link" href="https://nefer-owo7.itch.io/vile" target="_blank" rel="noopener" style="color:var(--muted);font-size:0.55rem;">ITCH.IO ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#1a0a00 0%,#3a1a00 100%);position:relative;">
+          <div class="card-thumb-grid"></div><span class="card-thumb-icon">🤡</span>
+          <span class="card-badge badge-browser">BROWSER</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tags"><span class="tag tag-technical">Technical</span><span class="tag tag-game-design">Game Design</span></div>
+          <div class="card-title">Bozo Brawl</div>
+          <p class="card-desc">Casual 1–2 player artillery brawler — aim, angle, and fire in chaotic turn-based combat.</p>
+          <div style="display:flex;gap:0.7rem;flex-wrap:wrap;">
+            <a class="card-link" href="https://nefer-owo7.itch.io/bozo-brawl" target="_blank" rel="noopener" style="color:var(--orange)">▶ PLAY →</a>
+            <a class="card-link" href="https://nefer-owo7.itch.io/bozo-brawl" target="_blank" rel="noopener" style="color:var(--muted);font-size:0.55rem;">ITCH.IO ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#0a1a08 0%,#162e10 100%);position:relative;">
+          <div class="card-thumb-grid"></div><span class="card-thumb-icon">🍎</span>
+          <span class="card-badge badge-download">DOWNLOAD</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tags"><span class="tag tag-technical">Technical</span><span class="tag tag-game-design">Game Design</span></div>
+          <div class="card-title">An Apple a Day</div>
+          <p class="card-desc">A simple Unreal Engine puzzle game — solve environmental puzzles with a satisfying, clean aesthetic.</p>
+          <a class="card-link" href="https://nefer-owo7.itch.io/an-apple-a-day" target="_blank" rel="noopener">DOWNLOAD →</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#0e1018 0%,#1e2030 100%);position:relative;">
+          <div class="card-thumb-grid"></div><span class="card-thumb-icon">🐘</span>
+          <span class="card-badge badge-download">DOWNLOAD</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tags"><span class="tag tag-game-design">Game Design</span><span class="tag tag-level-design">Level Design</span><span class="tag tag-technical">Technical</span><span class="tag tag-environment">Environment</span></div>
+          <div class="card-title">Silent Ivory</div>
+          <p class="card-desc">A story-driven puzzle platformer following a young elephant through a melancholy, handcrafted world.</p>
+          <a class="card-link" href="https://nefer-owo7.itch.io/silent-ivory" target="_blank" rel="noopener">DOWNLOAD →</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#1a0000 0%,#0a0000 100%);position:relative;">
+          <img src="assets/Project%20Anomaly/Cover.png" alt="Project Anomaly" loading="lazy" onerror="this.style.display='none'">
+          <span class="card-badge badge-wip">IN DEV</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tags"><span class="tag tag-technical">Technical</span><span class="tag tag-game-design">Game Design</span><span class="tag tag-level-design">Level Design</span></div>
+          <div class="card-title">Project Anomaly</div>
+          <p class="card-desc">A dark action game in active development in Godot 4 — heading to Steam. Wishlist now.</p>
+          <span class="card-link" style="opacity:0.5;cursor:default;">VIEW DETAILS</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#1a0f20 0%,#2e1a3a 100%);position:relative;">
+          <img src="assets/env%20design/Sanctuary/cover.png" alt="Sanctuary" loading="lazy" onerror="this.style.display='none'">
+          <span class="card-badge badge-art">3D / CONCEPT</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tags"><span class="tag tag-environment">Environment</span></div>
+          <div class="card-title">Sanctuary</div>
+          <p class="card-desc">An opulent interior built within a lotus-shaped architectural form. Eight distinct rooms flow through ornate arched doorways in a single unified structure.</p>
+          <span class="card-link" style="opacity:0.5;cursor:default;">VIEW GALLERY</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#0a1020 0%,#0f1e30 100%);position:relative;">
+          <img src="assets/env%20design/shahi%20karkhana/render.png" alt="Shahi Karkhana" loading="lazy" onerror="this.style.display='none'">
+          <span class="card-badge badge-art">3D / CONCEPT</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tags"><span class="tag tag-environment">Environment</span></div>
+          <div class="card-title">Shahi Karkhana</div>
+          <p class="card-desc">A Mughal-era royal workshop district reconstructed in 3D — artisan stalls, craft tools, and a mosque backdrop presented as a split render/wireframe.</p>
+          <span class="card-link" style="opacity:0.5;cursor:default;">VIEW GALLERY</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#1a0500 0%,#2a0800 100%);position:relative;">
+          <img src="assets/env%20design/metamorphose/1.png" alt="Metamorphose" loading="lazy" onerror="this.style.display='none'">
+          <span class="card-badge badge-art">3D / CONCEPT</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tags"><span class="tag tag-environment">Environment</span><span class="tag tag-level-design">Level Design</span></div>
+          <div class="card-title">Metamorphose</div>
+          <p class="card-desc">In-engine dark fantasy environment design for an isometric game. Stone corridors lit by amber doorways give way to crimson-soaked chambers.</p>
+          <span class="card-link" style="opacity:0.5;cursor:default;">VIEW GALLERY</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#001a18 0%,#002a26 100%);position:relative;">
+          <img src="assets/env%20design/Alien%20Caves/image.png" alt="Alien Caves" loading="lazy" onerror="this.style.display='none'">
+          <span class="card-badge badge-art">3D / CONCEPT</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tags"><span class="tag tag-environment">Environment</span></div>
+          <div class="card-title">Alien Caves</div>
+          <p class="card-desc">Concept art for a bioluminescent subterranean world — Roman ruin fragments on floating rock platforms beneath alien cave formations.</p>
+          <span class="card-link" style="opacity:0.5;cursor:default;">VIEW GALLERY</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ABOUT + SKILLS -->
+  <section id="about">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">// ABOUT</p>
+      <h2 class="section-title">THE BRIDGE</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="about-inner">
+      <div class="about-bio reveal">
+        <p class="about-bio-label">// BIO</p>
+        <h3 class="about-bio-title">Art. Code.<br/>The space between.</h3>
+        <p class="about-bio-text">
+          I'm Taha — a technical artist and designer who operates in the gap most teams struggle to close. I speak the language of artists and the language of engineers, and I use both to turn creative vision into something real, playable, and felt.
+        </p>
+        <p class="about-bio-text">
+          Across game design, environment art, level design, and engine-side technical work, I've built the kind of breadth that makes teams move faster and produce better work. When you understand a concept artist's intent <em>and</em> the constraints of the renderer executing it — when you can design the space <em>and</em> script the systems living inside it — you stop being one piece of the pipeline and start being the person who holds it together.
+        </p>
+      </div>
+      <div id="skills">
+        <p class="about-bio-label reveal">// SPECIALISATIONS</p>
+        <div class="skills-panels">
+
+          <div class="skill-panel reveal">
+            <div class="skill-icon">🎮</div>
+            <div class="skill-name">GAME DESIGN</div>
+            <ul class="skill-bullets">
+              <li>Systems & mechanics</li>
+              <li>Player experience</li>
+              <li>Balancing & iteration</li>
+            </ul>
+            <div class="skill-bar-wrap"><div class="skill-bar" data-width="88"></div></div>
+          </div>
+
+          <div class="skill-panel reveal">
+            <div class="skill-icon">🌿</div>
+            <div class="skill-name">ENVIRONMENT</div>
+            <ul class="skill-bullets">
+              <li>World building</li>
+              <li>Atmosphere & lighting</li>
+              <li>Modular asset pipelines</li>
+            </ul>
+            <div class="skill-bar-wrap"><div class="skill-bar" data-width="82"></div></div>
+          </div>
+
+          <div class="skill-panel reveal">
+            <div class="skill-icon">🗺️</div>
+            <div class="skill-name">LEVEL DESIGN</div>
+            <ul class="skill-bullets">
+              <li>Flow & pacing</li>
+              <li>Spatial storytelling</li>
+              <li>Blockout to final</li>
+            </ul>
+            <div class="skill-bar-wrap"><div class="skill-bar" data-width="85"></div></div>
+          </div>
+
+          <div class="skill-panel reveal">
+            <div class="skill-icon">⚙️</div>
+            <div class="skill-name">TECHNICAL ART</div>
+            <ul class="skill-bullets">
+              <li>Unreal / Unity / Godot</li>
+              <li>Blueprints, GDScript & C#</li>
+              <li>Shaders, tools & pipelines</li>
+            </ul>
+            <div class="skill-bar-wrap"><div class="skill-bar" data-width="78"></div></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- TOOLS & TECH -->
+    <div class="tools-section reveal">
+      <p class="about-bio-label">// TOOLS &amp; TECH</p>
+      <div class="tools-groups">
+
+        <div class="tools-group">
+          <span class="tg-label">ART &amp; 3D</span>
+          <div class="tg-divider"></div>
+          <div class="tools-row">
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/blender/F5792A" alt="Blender" loading="lazy" onerror="this.style.display='none'">
+              <span>Blender</span>
+            </div>
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/unrealengine/ffffff" alt="Unreal Engine" loading="lazy" onerror="this.style.display='none'">
+              <span>Unreal Engine</span>
+            </div>
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/adobephotoshop/31A8FF" alt="Photoshop" loading="lazy" onerror="this.style.display='none'">
+              <span>Photoshop</span>
+            </div>
+            <div class="tool-chip">
+              <div class="tc-icon">SP</div>
+              <span>Substance Painter</span>
+            </div>
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/autodesk/0696D7" alt="3ds Max" loading="lazy" onerror="this.style.display='none'">
+              <span>3ds Max</span>
+            </div>
+            <div class="tool-chip">
+              <div class="tc-icon">TM</div>
+              <span>Twinmotion</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tools-group">
+          <span class="tg-label">ENGINES &amp; TOOLS</span>
+          <div class="tg-divider"></div>
+          <div class="tools-row">
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/unity/ffffff" alt="Unity" loading="lazy" onerror="this.style.display='none'">
+              <span>Unity</span>
+            </div>
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/godotengine/478CBF" alt="Godot" loading="lazy" onerror="this.style.display='none'">
+              <span>Godot</span>
+            </div>
+            <div class="tool-chip">
+              <div class="tc-icon">PH</div>
+              <span>Phaser</span>
+            </div>
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" loading="lazy" onerror="this.style.display='none'">
+              <span>GitHub</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tools-group">
+          <span class="tg-label">LANGUAGES</span>
+          <div class="tg-divider"></div>
+          <div class="tools-row">
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/csharp/512BD4" alt="C#" loading="lazy" onerror="this.style.display='none'">
+              <span>C#</span>
+            </div>
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/godotengine/478CBF" alt="GDScript" loading="lazy" onerror="this.style.display='none'">
+              <span>GDScript</span>
+            </div>
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/javascript/F7DF1E" alt="JavaScript" loading="lazy" onerror="this.style.display='none'">
+              <span>JavaScript</span>
+            </div>
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/html5/E34F26" alt="HTML5" loading="lazy" onerror="this.style.display='none'">
+              <span>HTML5</span>
+            </div>
+            <div class="tool-chip">
+              <img src="https://cdn.simpleicons.org/unrealengine/ffffff" alt="Blueprints" loading="lazy" onerror="this.style.display='none'">
+              <span>Blueprints</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">// CONTACT</p>
+      <h2 class="section-title">LET'S BUILD SOMETHING</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="contact-box reveal">
+      <p class="contact-tagline">
+        Open to game dev roles, freelance projects, and collaborations.<br/>
+        Drop me a line — let's make something worth playing.
+      </p>
+      <!-- Replace with your actual email -->
+      <a class="contact-email" href="mailto:your@email.com">your@email.com</a>
+      <!-- Replace # with your CV/resume file path or Google Drive link -->
+      <div style="margin-bottom:1.5rem;">
+        <a href="#resume" download style="font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:0.12em;color:var(--muted);border:1px solid var(--card-b);padding:0.55rem 1.2rem;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='var(--orange)';this.style.borderColor='var(--orange)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--card-b)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-5-5 1.4-1.4 2.6 2.6V4h2v8.2l2.6-2.6L17 11l-5 5zm-7 4v-2h14v2H5z"/></svg>
+          DOWNLOAD CV
+        </a>
+      </div>
+      <div class="social-links">
+        <a class="social-link" href="https://wa.me/917007353834" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+          WHATSAPP
+        </a>
+        <a class="social-link" href="https://nefer-owo7.itch.io/" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M0 1.5C0 .672.672 0 1.5 0h21c.828 0 1.5.672 1.5 1.5v5.25c0 .412-.337.75-.75.75H.75A.75.75 0 0 1 0 6.75V1.5ZM3 9h2v6H3V9Zm4 0h2v6H7V9Zm4 0h2v6h-2V9Zm4 0h2v6h-2V9Zm4 0h2v6h-2V9ZM1.5 17.25h21a1.5 1.5 0 0 1 0 3h-21a1.5 1.5 0 0 1 0-3Z"/></svg>
+          ITCH.IO
+        </a>
+        <!-- Replace href with your GitHub URL -->
+        <a class="social-link" href="#github" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.11.793-.26.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          GITHUB
+        </a>
+        <!-- Replace href with your LinkedIn URL -->
+        <a class="social-link" href="https://www.linkedin.com/in/taha28" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LINKEDIN
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2026 TAHA &nbsp;·&nbsp; GAME DEVELOPER &nbsp;·&nbsp; BUILT WITH BLUEPRINT PRECISION
+  </footer>
+
+  <!-- GALLERY LIGHTBOX -->
+  <div class="gallery-overlay" id="galleryOverlay">
+    <div class="gallery-header">
+      <span class="gallery-project-name" id="galleryTitle"></span>
+      <button class="gallery-close" id="galleryClose">[ CLOSE ✕ ]</button>
+    </div>
+    <div class="gallery-main">
+      <button class="gallery-nav prev" id="galleryPrev">&#8592;</button>
+      <img id="galleryImg" src="" alt="" />
+      <button class="gallery-nav next" id="galleryNext">&#8594;</button>
+    </div>
+    <div class="gallery-caption" id="galleryCaption"></div>
+    <div class="gallery-strip" id="galleryStrip"></div>
+  </div>
+
+  <!-- WIP GAME DETAIL MODAL -->
+  <div class="modal-overlay" id="gameModal" role="dialog" aria-modal="true">
+    <div class="modal-panel">
+      <button class="modal-close" id="modalClose">[ CLOSE &nbsp;✕ ]</button>
+
+      <div class="modal-hero">
+        <p class="modal-eyebrow">// IN DEVELOPMENT · GODOT 4 · COMING TO STEAM</p>
+        <h2 class="modal-title">PROJECT ANOMALY</h2>
+        <p class="modal-subtitle">
+          A fully 3D boomer shooter — fast movement, relentless enemy pressure, and handcrafted level design built for players who want their FPS pure and punishing. Inspired by Doom, Quake, and Forgive Me Father 2.
+        </p>
+        <div class="modal-meta">
+          <span><strong>ENGINE</strong> Godot 4</span>
+          <span><strong>GENRE</strong> Boomer Shooter · FPS</span>
+          <span><strong>PLATFORM</strong> Steam (PC)</span>
+          <span><strong>INSPIRATIONS</strong> Doom · Quake · Forgive Me Father 2</span>
+          <!-- Replace # with your actual Steam wishlist URL when live -->
+          <span><a href="#steam-wishlist" style="color:var(--orange);font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:0.1em;text-decoration:none;" target="_blank">WISHLIST ON STEAM →</a></span>
+        </div>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- TRAILER -->
+        <div>
+          <div class="modal-section-title">TRAILER — GODOT BUILD</div>
+          <div class="modal-video-wrap">
+            <video id="trailerVideo" controls preload="metadata" poster="assets/Project%20Anomaly/Cover.png">
+              <source src="assets/Project%20Anomaly/trailer/trailer_web.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <!-- PROGRESS CLIPS -->
+        <div>
+          <div class="modal-section-title">UNREAL ENGINE PROTOTYPE FOOTAGE</div>
+          <div class="progress-clips">
+
+            <div class="pclip">
+              <div class="pclip-label">
+                <span class="pclip-tag tag-technical">UNREAL PROTOTYPE</span>
+                <span class="pclip-title">Movement &amp; Weapon Feel</span>
+              </div>
+              <div class="modal-video-wrap">
+                <video controls preload="metadata">
+                  <source src="assets/Project%20Anomaly/clips/clip1_movement_weapons_web.mp4" type="video/mp4">
+                </video>
+              </div>
+              <p class="pclip-desc">First pass at player locomotion and pistol feel inside the Unreal Engine 5 prototype. Grid-room test environment with HUD and health system active.</p>
+            </div>
+
+            <div class="pclip">
+              <div class="pclip-label">
+                <span class="pclip-tag tag-technical">UNREAL PROTOTYPE</span>
+                <span class="pclip-title">Enemy AI &amp; Encounter Design</span>
+              </div>
+              <div class="modal-video-wrap">
+                <video controls preload="metadata">
+                  <source src="assets/Project%20Anomaly/clips/clip2_enemy_ai_web.mp4" type="video/mp4">
+                </video>
+              </div>
+              <p class="pclip-desc">AI pathfinding and attack system in action — debug rays show enemy targeting logic. Two armoured enemy types in-frame, plus an early centaur variant on elevated geometry.</p>
+            </div>
+
+            <div class="pclip">
+              <div class="pclip-label">
+                <span class="pclip-tag tag-technical">UNREAL PROTOTYPE</span>
+                <span class="pclip-title">Enemy Variety &amp; Combat</span>
+              </div>
+              <div class="modal-video-wrap">
+                <video controls preload="metadata">
+                  <source src="assets/Project%20Anomaly/clips/clip3_godot_combat_web.mp4" type="video/mp4">
+                </video>
+              </div>
+              <p class="pclip-desc">Centaur enemy type with ranged attack tested in the Unreal prototype — showcasing enemy variety and combat loop under different encounter setups.</p>
+            </div>
+
+            <div class="pclip">
+              <div class="pclip-label">
+                <span class="pclip-tag tag-technical">UNREAL PROTOTYPE</span>
+                <span class="pclip-title">Rage Mode &amp; Dash Mechanic</span>
+              </div>
+              <div class="modal-video-wrap">
+                <video controls preload="metadata">
+                  <source src="assets/Project%20Anomaly/clips/clip4_rage_mode_dash_web.mp4" type="video/mp4">
+                </video>
+              </div>
+              <p class="pclip-desc">Rage Mode combat escalation mechanic triggering in-engine, plus dash ability tested across an open traversal space — both prototyped in Unreal before the port.</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- DEV LOG -->
+        <div>
+          <div class="modal-section-title">DEV LOG</div>
+          <div class="devlog-entries">
+            <div class="devlog-entry">
+              <span class="devlog-date">2025 · UE5</span>
+              <div class="devlog-text">Project Anomaly begins as an Unreal Engine 5 prototype. Core FPS movement, combat loop, and early level blockouts are established. The boomer shooter direction — fast, aggressive, punishing — is locked in.</div>
+            </div>
+            <div class="devlog-entry">
+              <span class="devlog-date">2025 · PORT</span>
+              <div class="devlog-text">Mid-prototype, the project is ported to Godot 4. Core systems are rebuilt in GDScript, enabling faster iteration and full engine ownership. Unreal prototype footage preserved as development reference.</div>
+            </div>
+            <div class="devlog-entry">
+              <span class="devlog-date">2026 · ACTIVE</span>
+              <div class="devlog-text">Active development continues in Godot 4. Steam page is live — wishlist open. Progress updates dropping regularly.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLANNED FEATURES -->
+        <div>
+          <div class="modal-section-title">FEATURES &amp; PROGRESS</div>
+          <div class="features-grid">
+            <div class="feature-item done">
+              <span class="fi-check">✦</span>
+              <span>Unreal Engine prototype</span>
+            </div>
+            <div class="feature-item done">
+              <span class="fi-check">✦</span>
+              <span>Core FPS movement &amp; combat loop</span>
+            </div>
+            <div class="feature-item done">
+              <span class="fi-check">✦</span>
+              <span>Godot 4 port &amp; system rebuild</span>
+            </div>
+            <div class="feature-item">
+              <span class="fi-check">◻</span>
+              <span>Enemy AI &amp; behaviour systems</span>
+            </div>
+            <div class="feature-item">
+              <span class="fi-check">◻</span>
+              <span>Full weapons arsenal</span>
+            </div>
+            <div class="feature-item">
+              <span class="fi-check">◻</span>
+              <span>Level design — full campaign</span>
+            </div>
+            <div class="feature-item">
+              <span class="fi-check">◻</span>
+              <span>Environment &amp; art pass</span>
+            </div>
+            <div class="feature-item">
+              <span class="fi-check">◻</span>
+              <span>Sound design &amp; OST</span>
+            </div>
+            <div class="feature-item">
+              <span class="fi-check">◻</span>
+              <span>Steam release build</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ACHIEVEMENT TOAST (must be before script so getElementById finds it) -->
+  <div id="achievement-toast" aria-live="polite"></div>
+
+  <!-- Boot safety: separate script so it survives any error in the main script -->
+  <script>
+    setTimeout(function() {
+      var b = document.getElementById('boot');
+      if (b) { b.style.opacity = '0'; setTimeout(function(){ if (b.parentNode) b.remove(); }, 600); }
+    }, 5000);
+  </script>
+
+  <script>
+    document.documentElement.classList.add('js');
+
+    // ─── PROJECT DATA ───────────────────────────────────────────────────────────
+    const projects = [
+      {
+        title: "Vile",
+        subtitle: "The Echoes of Hunt",
+        desc: "A 2D survival platformer set in a hostile, overgrown world. Navigate escalating threats, manage scarce resources, and survive the echoes of something ancient.",
+        tags: ["technical", "level-design", "game-design"],
+        tagLabels: { "technical": "Technical", "level-design": "Level Design", "game-design": "Game Design" },
+        img: "assets/Vile/Cover.png",
+        gradient: "linear-gradient(135deg, #0a1a00 0%, #1a2e00 100%)",
+        url: "https://nefer-owo7.itch.io/vile",
+        cta: "PLAY IN BROWSER",
+        badge: "browser",
+        playable: true
+      },
+      {
+        title: "Bozo Brawl",
+        desc: "Casual 1–2 player artillery brawler — aim, angle, and fire in chaotic turn-based combat.",
+        tags: ["technical", "game-design"],
+        tagLabels: { "technical": "Technical", "game-design": "Game Design" },
+        icon: "🤡",
+        gradient: "linear-gradient(135deg, #1a0a00 0%, #3a1a00 100%)",
+        url: "https://nefer-owo7.itch.io/bozo-brawl",
+        cta: "PLAY IN BROWSER",
+        badge: "browser",
+        playable: true
+      },
+      {
+        title: "An Apple a Day",
+        desc: "A simple Unreal Engine puzzle game — solve environmental puzzles with a satisfying, clean aesthetic.",
+        tags: ["technical", "game-design"],
+        tagLabels: { "technical": "Technical", "game-design": "Game Design" },
+        icon: "🍎",
+        gradient: "linear-gradient(135deg, #0a1a08 0%, #162e10 100%)",
+        url: "https://nefer-owo7.itch.io/an-apple-a-day",
+        cta: "DOWNLOAD",
+        badge: "download"
+      },
+      {
+        title: "Silent Ivory",
+        desc: "A story-driven puzzle platformer following a young elephant through a melancholy, handcrafted world.",
+        tags: ["game-design", "level-design", "technical", "environment"],
+        tagLabels: { "game-design": "Game Design", "level-design": "Level Design", "technical": "Technical", "environment": "Environment" },
+        icon: "🐘",
+        gradient: "linear-gradient(135deg, #0e1018 0%, #1e2030 100%)",
+        url: "https://nefer-owo7.itch.io/silent-ivory",
+        cta: "DOWNLOAD",
+        badge: "download"
+      },
+      {
+        title: "Project Anomaly",
+        desc: "A dark action game in active development in Godot 4 — heading to Steam. Wishlist now.",
+        tags: ["technical", "game-design", "level-design"],
+        tagLabels: { "technical": "Technical", "game-design": "Game Design", "level-design": "Level Design" },
+        img: "assets/Project%20Anomaly/Cover.png",
+        gradient: "linear-gradient(135deg, #1a0000 0%, #0a0000 100%)",
+        url: null,
+        cta: "VIEW DETAILS",
+        badge: "wip"
+      },
+      {
+        title: "Sanctuary",
+        desc: "An opulent interior built within a lotus-shaped architectural form. Eight distinct rooms — library, sitting room, garden alcove, and grand hall — flow through ornate arched doorways in a single unified structure.",
+        tags: ["environment"],
+        tagLabels: { "environment": "Environment" },
+        img: "assets/env%20design/Sanctuary/cover.png",
+        gradient: "linear-gradient(135deg, #1a0f20 0%, #2e1a3a 100%)",
+        url: null,
+        cta: "VIEW GALLERY",
+        badge: "art",
+        galleryKey: "sanctuary"
+      },
+      {
+        title: "Shahi Karkhana",
+        desc: "A Mughal-era royal workshop district reconstructed in 3D — artisan stalls, craft tools, and a mosque backdrop. Presented as a split render/wireframe to expose the modelling and composition process.",
+        tags: ["environment"],
+        tagLabels: { "environment": "Environment" },
+        img: "assets/env%20design/shahi%20karkhana/render.png",
+        gradient: "linear-gradient(135deg, #0a1020 0%, #0f1e30 100%)",
+        url: null,
+        cta: "VIEW GALLERY",
+        badge: "art",
+        galleryKey: "shahi-karkhana"
+      },
+      {
+        title: "Metamorphose",
+        desc: "In-engine dark fantasy environment design for an isometric game. Stone corridors lit by amber doorways give way to crimson-soaked chambers anchored by imposing statue forms.",
+        tags: ["environment", "level-design"],
+        tagLabels: { "environment": "Environment", "level-design": "Level Design" },
+        img: "assets/env%20design/metamorphose/1.png",
+        gradient: "linear-gradient(135deg, #1a0500 0%, #2a0800 100%)",
+        url: null,
+        cta: "VIEW GALLERY",
+        badge: "art",
+        galleryKey: "metamorphose"
+      },
+      {
+        title: "Alien Caves",
+        desc: "Concept art for a bioluminescent subterranean world — Roman ruin fragments rest on floating rock platforms beneath alien cave formations. A lone figure establishes the sense of scale. Includes greyscale value study.",
+        tags: ["environment"],
+        tagLabels: { "environment": "Environment" },
+        img: "assets/env%20design/Alien%20Caves/image.png",
+        gradient: "linear-gradient(135deg, #001a18 0%, #002a26 100%)",
+        url: null,
+        cta: "VIEW GALLERY",
+        badge: "art",
+        galleryKey: "alien-caves"
+      }
+    ];
+
+    // ─── GALLERY DATA ────────────────────────────────────────────────────────────
+    const galleries = {
+      'sanctuary': {
+        name: 'SANCTUARY',
+        images: [
+          { src: 'assets/env%20design/Sanctuary/full.png',          caption: 'EXTERIOR — LOTUS FORM' },
+          { src: 'assets/env%20design/Sanctuary/all-views.png',     caption: 'INTERIOR — ALL ROOMS' },
+          { src: 'assets/env%20design/Sanctuary/front_section.png', caption: 'FRONT SECTION' },
+          { src: 'assets/env%20design/Sanctuary/front_wire.png',    caption: 'WIREFRAME' },
+        ]
+      },
+      'shahi-karkhana': {
+        name: 'SHAHI KARKHANA',
+        images: [
+          { src: 'assets/env%20design/shahi%20karkhana/render.png', caption: 'FULL SCENE — RENDER / WIREFRAME SPLIT' },
+        ]
+      },
+      'metamorphose': {
+        name: 'METAMORPHOSE',
+        images: [
+          { src: 'assets/env%20design/metamorphose/1.png', caption: 'SCENE 01 — THE DOOR' },
+          { src: 'assets/env%20design/metamorphose/2.png', caption: 'SCENE 02 — THE STATUE' },
+        ]
+      },
+      'alien-caves': {
+        name: 'ALIEN CAVES',
+        images: [
+          { src: 'assets/env%20design/Alien%20Caves/image.png',      caption: 'FINAL COLOUR' },
+          { src: 'assets/env%20design/Alien%20Caves/greyscale.jpeg', caption: 'VALUE STUDY' },
+        ]
+      }
+    };
+
+    const tagClass = {
+      "game-design":  "tag-game-design",
+      "environment":  "tag-environment",
+      "level-design": "tag-level-design",
+      "technical":    "tag-technical"
+    };
+
+    const badgeLabel = { browser: "BROWSER", download: "DOWNLOAD", wip: "IN DEV", art: "3D / CONCEPT" };
+    const badgeCls   = { browser: "badge-browser", download: "badge-download", wip: "badge-wip", art: "badge-art" };
+
+    // ─── RENDER PROJECTS ────────────────────────────────────────────────────────
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+
+    function renderProjects(filter, animate) {
+      const grid = document.getElementById('projectsGrid');
+      if (animate) {
+        const visible = grid.querySelectorAll('.project-card:not(.hidden)');
+        visible.forEach(c => c.classList.add('card-glitch-out'));
+        setTimeout(() => doRender(filter, grid, true), 210);
+      } else {
+        doRender(filter, grid, false);
+      }
+    }
+
+    function doRender(filter, grid, animate) {
+      try {
+        grid.innerHTML = '';
+        projects.forEach(p => {
+          const show = filter === 'all' || p.tags.includes(filter);
+          const card = document.createElement('div');
+          card.className = 'project-card' + (show ? '' : ' hidden');
+
+          const thumbInner = p.img
+            ? `<img src="${p.img}" alt="${p.title}" loading="lazy" onerror="this.style.display='none'">`
+            : `<div class="card-thumb-grid"></div><span class="card-thumb-icon">${p.icon}</span>`;
+
+          let ctaHTML;
+          if (p.playable) {
+            ctaHTML = `<div style="display:flex;gap:0.7rem;flex-wrap:wrap;">
+              <button class="card-link-modal" data-play="${p.title}" style="color:var(--orange)">▶ PLAY →</button>
+              <a class="card-link" href="${p.url}" target="_blank" rel="noopener" style="color:var(--muted);font-size:0.55rem;">ITCH.IO ↗</a>
+            </div>`;
+          } else if (p.url) {
+            ctaHTML = `<a class="card-link" href="${p.url}" target="_blank" rel="noopener">${p.cta} →</a>`;
+          } else if (p.galleryKey) {
+            ctaHTML = `<button class="card-link-modal" data-gallery="${p.galleryKey}">${p.cta} →</button>`;
+          } else {
+            ctaHTML = `<button class="card-link-modal" data-modal="wip">${p.cta} →</button>`;
+          }
+
+          card.innerHTML = `
+            <div class="card-thumb" style="background:${p.gradient}; position:relative;">
+              ${thumbInner}
+              <span class="card-badge ${badgeCls[p.badge]}">${badgeLabel[p.badge]}</span>
+            </div>
+            <div class="card-body">
+              <div class="card-tags">
+                ${p.tags.map(t => `<span class="tag ${tagClass[t]}">${p.tagLabels[t]}</span>`).join('')}
+              </div>
+              <div class="card-title">${p.title}${p.subtitle ? `<span style="display:block;font-size:0.65rem;font-weight:400;color:var(--muted);letter-spacing:0.08em;margin-top:0.2rem;">${p.subtitle}</span>` : ''}</div>
+              <p class="card-desc">${p.desc}</p>
+              ${ctaHTML}
+            </div>`;
+          if (show && animate) {
+            card.classList.add('card-glitch-in');
+            card.addEventListener('animationend', () => card.classList.remove('card-glitch-in'), { once: true });
+          }
+
+          if (show && !isTouch) {
+            card.addEventListener('mousemove', e => {
+              const r = card.getBoundingClientRect();
+              const x = (e.clientX - r.left) / r.width  - 0.5;
+              const y = (e.clientY - r.top)  / r.height - 0.5;
+              card.style.transform = `perspective(700px) rotateY(${x * 14}deg) rotateX(${-y * 10}deg) translateY(-4px)`;
+              card.style.boxShadow = `${-x * 10}px ${-y * 8}px 30px rgba(255,107,0,0.2)`;
+            });
+            card.addEventListener('mouseleave', () => {
+              card.style.transform = '';
+              card.style.boxShadow = '';
+            });
+          }
+
+          grid.appendChild(card);
+        });
+
+        document.querySelectorAll('[data-modal="wip"]').forEach(btn => btn.addEventListener('click', openModal));
+        document.querySelectorAll('[data-gallery]').forEach(btn => btn.addEventListener('click', () => { openGallery(btn.dataset.gallery); unlock('gallery', 'ART APPRECIATOR', 'Environment design gallery opened.'); }));
+        document.querySelectorAll('[data-play]').forEach(btn => btn.addEventListener('click', () => openPlay(btn.dataset.play)));
+      } catch(e) {
+        // fallback: plain links if anything threw during render
+        grid.innerHTML = projects.map(p => `<a class="project-card" href="${p.url || '#'}" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
+          <div class="card-thumb" style="background:${p.gradient};position:relative;"><span class="card-badge ${badgeCls[p.badge]}">${badgeLabel[p.badge]}</span></div>
+          <div class="card-body"><div class="card-title">${p.title}</div><p class="card-desc">${p.desc}</p></div></a>`).join('');
+      }
+    }
+
+    renderProjects('all', false);
+
+    // ─── FILTER BUTTONS ─────────────────────────────────────────────────────────
+    const seenFilters = new Set(['all']);
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderProjects(btn.dataset.filter, true);
+        seenFilters.add(btn.dataset.filter);
+        if (btn.dataset.filter === 'environment') unlock('explorer', 'EXPLORER', 'Entered the environment vault.');
+        if (seenFilters.size >= 5) unlock('fullscan', 'FULL SCAN', 'All project categories viewed.');
+      });
+    });
+
+    // ─── HAMBURGER ──────────────────────────────────────────────────────────────
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+
+    // Close mobile nav on link click
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+    });
+
+    // ─── ACTIVE NAV LINK ON SCROLL ──────────────────────────────────────────────
+    const sections = ['about', 'projects', 'skills', 'contact'];
+    const navLinks = document.querySelectorAll('.nav-links a');
+
+    function updateNav() {
+      let current = '';
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && window.scrollY >= el.offsetTop - 120) current = id;
+      });
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    }
+    window.addEventListener('scroll', updateNav, { passive: true });
+
+    // ─── SCROLL REVEAL ───────────────────────────────────────────────────────────
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // ─── SKILL BARS ON SCROLL ────────────────────────────────────────────────────
+    const barObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('.skill-bar').forEach(bar => {
+            bar.style.width = bar.dataset.width + '%';
+          });
+          barObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    document.querySelectorAll('.skill-panel').forEach(panel => barObserver.observe(panel));
+
+    // ─── MODAL ───────────────────────────────────────────────────────────────────
+    const overlay = document.getElementById('gameModal');
+
+    function openModal() {
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) closeModal();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { closeModal(); closeGallery(); }
+    });
+
+    // ─── GALLERY ─────────────────────────────────────────────────────────────────
+    const galleryOverlay = document.getElementById('galleryOverlay');
+    const galleryImg     = document.getElementById('galleryImg');
+    const galleryCaption = document.getElementById('galleryCaption');
+    const galleryStrip   = document.getElementById('galleryStrip');
+    const galleryTitle   = document.getElementById('galleryTitle');
+    const galleryPrev    = document.getElementById('galleryPrev');
+    const galleryNext    = document.getElementById('galleryNext');
+
+    let currentGallery = null;
+    let currentIndex   = 0;
+
+    function showImage(index) {
+      const images = currentGallery.images;
+      currentIndex = Math.max(0, Math.min(index, images.length - 1));
+      galleryImg.style.opacity = 0;
+      setTimeout(() => {
+        galleryImg.src = images[currentIndex].src;
+        galleryImg.alt = images[currentIndex].caption;
+        galleryCaption.textContent = images[currentIndex].caption;
+        galleryImg.style.opacity = 1;
+      }, 120);
+      galleryStrip.querySelectorAll('.gallery-thumb').forEach((t, i) => t.classList.toggle('active', i === currentIndex));
+      galleryPrev.disabled = currentIndex === 0;
+      galleryNext.disabled = currentIndex === images.length - 1;
+    }
+
+    function openGallery(key) {
+      currentGallery = galleries[key];
+      if (!currentGallery) return;
+      galleryTitle.textContent = currentGallery.name;
+      galleryStrip.innerHTML = currentGallery.images.map((img, i) =>
+        `<img class="gallery-thumb" src="${img.src}" alt="${img.caption}" data-index="${i}" loading="lazy" onerror="this.style.display='none'">`
+      ).join('');
+      galleryStrip.querySelectorAll('.gallery-thumb').forEach(t => {
+        t.addEventListener('click', () => showImage(parseInt(t.dataset.index)));
+      });
+      showImage(0);
+      galleryOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeGallery() {
+      galleryOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('galleryClose').addEventListener('click', closeGallery);
+    galleryOverlay.addEventListener('click', e => { if (e.target === galleryOverlay) closeGallery(); });
+    galleryPrev.addEventListener('click', () => showImage(currentIndex - 1));
+    galleryNext.addEventListener('click', () => showImage(currentIndex + 1));
+
+    document.addEventListener('keydown', e => {
+      if (!galleryOverlay.classList.contains('open')) return;
+      if (e.key === 'ArrowLeft')  showImage(currentIndex - 1);
+      if (e.key === 'ArrowRight') showImage(currentIndex + 1);
+    });
+
+    // ─── PLAY MODAL ──────────────────────────────────────────────────────────────
+    const playOverlay = document.getElementById('playOverlay');
+
+    function openPlay(title) {
+      const p = projects.find(x => x.title === title);
+      if (!p) return;
+      document.getElementById('playTitle').textContent = p.title.toUpperCase();
+      document.getElementById('playCover').src = p.img || '';
+      document.getElementById('playSplashTitle').textContent = p.title;
+      document.getElementById('playSplashSub').textContent = p.desc;
+      document.getElementById('playItchLink').href = p.url;
+      document.getElementById('playBtn').href = p.url;
+      playOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePlay() {
+      playOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('playClose').addEventListener('click', closePlay);
+    playOverlay.addEventListener('click', e => { if (e.target === playOverlay) closePlay(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlay(); });
+
+    // ─── SCROLL PROGRESS ─────────────────────────────────────────────────────────
+    const scrollBar = document.getElementById('scroll-progress');
+    window.addEventListener('scroll', () => {
+      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+      scrollBar.style.width = pct + '%';
+    }, { passive: true });
+
+    // ─── CUSTOM CURSOR ───────────────────────────────────────────────────────────
+    const cur = document.getElementById('cursor');
+    if (window.matchMedia('(pointer: fine)').matches) {
+      document.addEventListener('mousemove', e => {
+        cur.style.transform = `translate(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%))`;
+      });
+      document.addEventListener('mouseover', e => {
+        const t = e.target.closest('a, button, .project-card, .tool-chip, .filter-btn, .gallery-thumb');
+        cur.classList.toggle('hover', !!t);
+      });
+    } else {
+      cur.style.display = 'none';
+    }
+
+    // ─── STAT COUNTERS ───────────────────────────────────────────────────────────
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    const statsObserver = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      statsObserver.disconnect();
+      entry.target.querySelectorAll('strong[data-target]').forEach(el => {
+        const target = +el.dataset.target;
+        let startTs = null;
+        const dur = 1200;
+        function tick(ts) {
+          if (!startTs) startTs = ts;
+          const p = Math.min((ts - startTs) / dur, 1);
+          el.textContent = Math.round(easeOutCubic(p) * target);
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }, { threshold: 0.5 });
+    const statsEl = document.querySelector('.hero-stats');
+    if (statsEl) statsObserver.observe(statsEl);
+
+    // ─── ACHIEVEMENT SYSTEM ──────────────────────────────────────────────────────
+    const achToastContainer = document.getElementById('achievement-toast');
+    let achShowing = false;
+    const achQueue = [];
+    const achUnlocked = new Set();
+
+    function unlock(id, title, desc) {
+      if (achUnlocked.has(id)) return;
+      achUnlocked.add(id);
+      achQueue.push({ title, desc });
+      if (!achShowing) showNextAch();
+    }
+
+    function beepAch() {
+      if (!soundOn || !audioCtx) return;
+      if (audioCtx.state === 'suspended') { audioCtx.resume().then(beepAch); return; }
+      try {
+        const t = audioCtx.currentTime;
+        [[440, 0, 0.1], [550, 0.1, 0.1], [660, 0.2, 0.1], [880, 0.32, 0.12]].forEach(([freq, delay, vol]) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g); g.connect(audioCtx.destination);
+          o.type = 'sine';
+          o.frequency.value = freq;
+          g.gain.setValueAtTime(vol, t + delay);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.14);
+          o.start(t + delay); o.stop(t + delay + 0.15);
+        });
+      } catch(e) {}
+    }
+
+    function showNextAch() {
+      if (!achQueue.length) { achShowing = false; return; }
+      achShowing = true;
+      const { title, desc } = achQueue.shift();
+      beepAch();
+      const toast = document.createElement('div');
+      toast.className = 'ach-toast';
+      toast.innerHTML = `
+        <div class="ach-label">// ACHIEVEMENT UNLOCKED</div>
+        <div class="ach-title">${title}</div>
+        <div class="ach-desc">${desc}</div>
+        <div class="ach-bar"><div class="ach-bar-fill ach-fill-bar"></div></div>`;
+      achToastContainer.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+        const fill = toast.querySelector('.ach-fill-bar');
+        requestAnimationFrame(() => { fill.style.width = '0%'; });
+      });
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => { toast.remove(); showNextAch(); }, 380);
+      }, 3200);
+    }
+
+    const contactObserver = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { unlock('contact', 'CONTACT REACHED', "Let's build something."); contactObserver.disconnect(); }
+    }, { threshold: 0.15 });
+    const contactEl = document.getElementById('contact');
+    if (contactEl) contactObserver.observe(contactEl);
+
+    const trailerVid = document.getElementById('trailerVideo');
+    if (trailerVid) trailerVid.addEventListener('play', () => unlock('trailer', 'CUTSCENE UNLOCKED', 'You watched the trailer.'), { once: true });
+
+    // ─── SOUND SYSTEM ────────────────────────────────────────────────────────────
+    let soundOn = true;
+    let audioCtx = null;
+
+    document.addEventListener('click', function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      }
+      document.removeEventListener('click', initAudio);
+    }, { once: true });
+
+    function beep(freq, dur, vol) {
+      if (!soundOn || !audioCtx) return;
+      if (audioCtx.state === 'suspended') { audioCtx.resume().then(() => beep(freq, dur, vol)); return; }
+      try {
+        const t = audioCtx.currentTime;
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.start(t); o.stop(t + dur);
+      } catch(e) {}
+    }
+
+    const soundBtn = document.getElementById('sound-btn');
+    if (soundBtn) {
+      const updateSoundIcon = () => {
+        soundBtn.classList.toggle('active', soundOn);
+        soundBtn.querySelectorAll('.sound-wave').forEach(w => w.style.display = soundOn ? '' : 'none');
+        soundBtn.querySelectorAll('.sound-off-line').forEach(w => w.style.display = soundOn ? 'none' : '');
+      };
+      updateSoundIcon();
+
+      soundBtn.addEventListener('click', () => {
+        soundOn = !soundOn;
+        updateSoundIcon();
+        if (soundOn) {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const startBeep = () => beep(880, 0.18, 0.12);
+          audioCtx.state === 'suspended' ? audioCtx.resume().then(startBeep) : startBeep();
+        }
+      });
+    }
+
+    let lastHover = null;
+    document.addEventListener('mouseover', e => {
+      const t = e.target.closest('a, button, .project-card, .filter-btn, .tool-chip, .gallery-thumb');
+      if (t && t !== lastHover) { beep(660, 0.07, 0.06); lastHover = t; }
+      if (!t) lastHover = null;
+    });
+    document.addEventListener('click', e => {
+      if (e.target.closest('a, button') && e.target !== soundBtn) beep(1100, 0.09, 0.08);
+    });
+
+    // ─── TEXT SCRAMBLE ───────────────────────────────────────────────────────────
+    function scrambleHeroName() {
+      const el = document.querySelector('.hero-name');
+      if (!el) return;
+      const target = el.textContent.trim();
+      const chars  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@!%';
+      const total  = 700;
+      const revealPer = total / target.length;
+      let startTs = null;
+      function rand() { return chars[Math.floor(Math.random() * chars.length)]; }
+      function tick(ts) {
+        if (!startTs) startTs = ts;
+        const elapsed = ts - startTs;
+        const revealed = Math.floor(elapsed / revealPer);
+        el.textContent = target.split('').map((ch, i) =>
+          i < revealed ? ch : rand()
+        ).join('');
+        if (elapsed < total + revealPer) requestAnimationFrame(tick);
+        else el.textContent = target;
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // ─── BOOT SCREEN ─────────────────────────────────────────────────────────────
+    const bootEl  = document.getElementById('boot');
+    const bootBar = document.getElementById('bootBar');
+    const bootTxt = document.getElementById('bootStatus');
+
+    const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    if (isMobileDevice) {
+      bootEl.remove();
+      scrambleHeroName();
+    } else {
+      const steps = [
+        [15,  'LOADING ASSETS...'],
+        [35,  'INITIALIZING SYSTEMS...'],
+        [60,  'ESTABLISHING CONNECTION...'],
+        [80,  'RENDERING ENVIRONMENT...'],
+        [100, 'READY.']
+      ];
+
+      let si = 0;
+      function bootStep() {
+        try {
+          if (si >= steps.length) {
+            setTimeout(() => {
+              bootEl.classList.add('out');
+              setTimeout(() => { bootEl.remove(); scrambleHeroName(); }, 800);
+            }, 300);
+            return;
+          }
+          const [pct, label] = steps[si++];
+          bootBar.style.width = pct + '%';
+          bootTxt.textContent = label;
+          setTimeout(bootStep, pct === 100 ? 400 : 380);
+        } catch(e) {
+          if (bootEl && bootEl.parentNode) bootEl.remove();
+        }
+      }
+      setTimeout(bootStep, 200);
+    }
+  </script>
+</body>
+</html>
