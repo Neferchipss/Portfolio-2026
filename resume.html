@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taha — Game Developer CV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #e85d00;
+      --dark:   #0d1117;
+      --mid:    #444c56;
+      --light:  #6e7681;
+      --bg:     #ffffff;
+      --rule:   #e1e4e8;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--dark);
+      background: var(--bg);
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 48px 64px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--dark);
+      margin-bottom: 24px;
+    }
+
+    .header-left h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--dark);
+      line-height: 1.1;
+    }
+
+    .header-left .tagline {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--light);
+      margin-top: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    .header-left .tagline span {
+      color: var(--orange);
+      font-weight: 500;
+    }
+
+    .header-right {
+      text-align: right;
+      font-size: 12px;
+      color: var(--mid);
+      line-height: 1.8;
+    }
+
+    .header-right a {
+      color: var(--mid);
+      text-decoration: none;
+    }
+
+    .header-right a:hover { color: var(--orange); }
+
+    /* ── SECTIONS ── */
+    section { margin-bottom: 28px; }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    /* ── PROFILE ── */
+    .profile p {
+      font-size: 13.5px;
+      color: var(--mid);
+      line-height: 1.7;
+    }
+
+    /* ── SKILLS GRID ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .skill-item { }
+
+    .skill-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 2px;
+    }
+
+    .skill-tags {
+      font-size: 11.5px;
+      color: var(--light);
+      line-height: 1.6;
+    }
+
+    /* ── PROJECTS ── */
+    .project { margin-bottom: 16px; }
+    .project:last-child { margin-bottom: 0; }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .project-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .project-tags {
+      font-size: 11px;
+      color: var(--light);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .project-subtitle {
+      font-size: 11px;
+      color: var(--orange);
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+
+    .project-desc {
+      font-size: 12.5px;
+      color: var(--mid);
+      line-height: 1.6;
+    }
+
+    .project-link {
+      font-size: 11px;
+      color: var(--light);
+    }
+
+    .project-link a {
+      color: var(--light);
+      text-decoration: none;
+    }
+
+    .project-link a:hover { color: var(--orange); }
+
+    /* ── TOOLS ── */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 4px 16px;
+      font-size: 12.5px;
+    }
+
+    .tool-label {
+      font-weight: 600;
+      color: var(--dark);
+      white-space: nowrap;
+    }
+
+    .tool-value { color: var(--mid); }
+
+    /* ── RULE ── */
+    hr { border: none; border-top: 1px solid var(--rule); margin: 10px 0; }
+
+    /* ── PRINT ── */
+    @media print {
+      body { padding: 24px 32px 32px; font-size: 12px; }
+      header { padding-bottom: 14px; margin-bottom: 18px; }
+      .header-left h1 { font-size: 26px; }
+      section { margin-bottom: 18px; }
+      a { color: inherit !important; text-decoration: none; }
+      @page { margin: 1.2cm 1.4cm; size: A4; }
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 24px 20px; }
+      header { flex-direction: column; gap: 12px; }
+      .header-right { text-align: left; }
+      .skills-grid { grid-template-columns: 1fr; }
+      .project-header { flex-direction: column; gap: 2px; }
+      .tools-grid { grid-template-columns: 1fr; }
+      .tool-label::after { content: ':'; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <h1>TAHA</h1>
+      <p class="tagline">Game Developer &nbsp;·&nbsp; <span>Technical Artist</span> &nbsp;·&nbsp; Designer</p>
+    </div>
+    <div class="header-right">
+      <a href="mailto:your@email.com">your@email.com</a><br/>
+      <a href="https://wa.me/917007353834" target="_blank">+91 70073 53834</a><br/>
+      <a href="https://neferchipss.github.io/portfolio/" target="_blank">neferchipss.github.io/portfolio</a><br/>
+      <a href="https://nefer-owo7.itch.io/" target="_blank">nefer-owo7.itch.io</a><br/>
+      <a href="https://github.com/Neferchipss" target="_blank">github.com/Neferchipss</a><br/>
+      <a href="https://www.linkedin.com/in/taha28" target="_blank">linkedin.com/in/taha28</a>
+    </div>
+  </header>
+
+  <section class="profile">
+    <p class="section-title">Profile</p>
+    <p>Technical artist and designer who bridges the gap between art and engineering. Four shipped games across 2D, 3D, and puzzle genres — one title in active development heading to Steam. Fluent in creative vision and engine constraints: able to design systems, build spaces, and implement the pipelines that hold them together across Unreal Engine, Godot, and Unity.</p>
+  </section>
+
+  <section>
+    <p class="section-title">Specialisations</p>
+    <div class="skills-grid">
+      <div class="skill-item">
+        <div class="skill-name">Game Design</div>
+        <div class="skill-tags">Systems &amp; mechanics design · Player experience · Balancing &amp; iteration</div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-name">Level Design</div>
+        <div class="skill-tags">Flow &amp; pacing · Spatial storytelling · Blockout to final</div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-name">Environment Art</div>
+        <div class="skill-tags">World building · Atmosphere &amp; lighting · Modular asset pipelines</div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-name">Technical Art</div>
+        <div class="skill-tags">Blueprints · GDScript · C# · Shaders · Tools &amp; pipelines</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-title">Projects</p>
+
+    <div class="project">
+      <div class="project-header">
+        <span class="project-title">Project Anomaly</span>
+        <span class="project-tags">Technical · Game Design · Level Design</span>
+      </div>
+      <p class="project-subtitle">Dark Action FPS · Godot 4 · In Development — Heading to Steam</p>
+      <p class="project-desc">Fast-paced boomer shooter inspired by Doom and Quake. Core FPS movement, combat loop, and enemy AI system prototyped in Unreal Engine 5, then ported to Godot 4 for full engine ownership. Rage mode, dash mechanic, and ranged enemy variants implemented. Steam page live.</p>
+    </div>
+
+    <hr/>
+
+    <div class="project">
+      <div class="project-header">
+        <span class="project-title">Vile — The Echoes of Hunt</span>
+        <span class="project-tags">Technical · Level Design · Game Design</span>
+      </div>
+      <p class="project-subtitle">2D Survival Platformer · Playable in browser</p>
+      <p class="project-desc">Survival platformer set in a hostile, overgrown world. Designed core systems, level layouts, threat escalation, and resource scarcity loops.</p>
+      <p class="project-link"><a href="https://nefer-owo7.itch.io/vile">nefer-owo7.itch.io/vile</a></p>
+    </div>
+
+    <hr/>
+
+    <div class="project">
+      <div class="project-header">
+        <span class="project-title">Silent Ivory</span>
+        <span class="project-tags">Game Design · Level Design · Technical · Environment</span>
+      </div>
+      <p class="project-subtitle">Story-Driven Puzzle Platformer · Full pipeline</p>
+      <p class="project-desc">Followed a young elephant through a handcrafted, melancholy world. Handled complete pipeline: game design, environment art, level design, and technical implementation.</p>
+      <p class="project-link"><a href="https://nefer-owo7.itch.io/silent-ivory">nefer-owo7.itch.io/silent-ivory</a></p>
+    </div>
+
+    <hr/>
+
+    <div class="project">
+      <div class="project-header">
+        <span class="project-title">Bozo Brawl</span>
+        <span class="project-tags">Technical · Game Design</span>
+      </div>
+      <p class="project-subtitle">1–2 Player Artillery Brawler · Playable in browser</p>
+      <p class="project-desc">Casual turn-based artillery game. Designed and implemented core aim-and-fire mechanics and combat loop.</p>
+      <p class="project-link"><a href="https://nefer-owo7.itch.io/bozo-brawl">nefer-owo7.itch.io/bozo-brawl</a></p>
+    </div>
+
+    <hr/>
+
+    <div class="project">
+      <div class="project-header">
+        <span class="project-title">An Apple a Day</span>
+        <span class="project-tags">Technical · Game Design</span>
+      </div>
+      <p class="project-subtitle">Puzzle Game · Unreal Engine 5</p>
+      <p class="project-desc">Clean environmental puzzle game built in Unreal Engine 5.</p>
+      <p class="project-link"><a href="https://nefer-owo7.itch.io/an-apple-a-day">nefer-owo7.itch.io/an-apple-a-day</a></p>
+    </div>
+
+    <hr/>
+
+    <div class="project">
+      <div class="project-header">
+        <span class="project-title">Environment Design — Sanctuary, Shahi Karkhana, Metamorphose, Alien Caves</span>
+        <span class="project-tags">Environment</span>
+      </div>
+      <p class="project-subtitle">3D / Concept Art · Blender · Twinmotion</p>
+      <p class="project-desc">Series of standalone environment pieces: a lotus-form interior (Sanctuary), a Mughal-era workshop district (Shahi Karkhana), an isometric dark fantasy scene (Metamorphose), and bioluminescent cave concept art (Alien Caves).</p>
+      <p class="project-link"><a href="https://neferchipss.github.io/portfolio/">neferchipss.github.io/portfolio</a></p>
+    </div>
+
+  </section>
+
+  <section>
+    <p class="section-title">Tools &amp; Technology</p>
+    <div class="tools-grid">
+      <span class="tool-label">Engines</span>
+      <span class="tool-value">Unreal Engine 5 &nbsp;·&nbsp; Godot 4 &nbsp;·&nbsp; Unity &nbsp;·&nbsp; Phaser</span>
+
+      <span class="tool-label">Languages</span>
+      <span class="tool-value">Blueprints &nbsp;·&nbsp; GDScript &nbsp;·&nbsp; C# &nbsp;·&nbsp; JavaScript &nbsp;·&nbsp; HTML5</span>
+
+      <span class="tool-label">Art &amp; 3D</span>
+      <span class="tool-value">Blender &nbsp;·&nbsp; 3ds Max &nbsp;·&nbsp; Substance Painter &nbsp;·&nbsp; Adobe Photoshop &nbsp;·&nbsp; Twinmotion</span>
+
+      <span class="tool-label">Version Control</span>
+      <span class="tool-value">Git &nbsp;·&nbsp; GitHub</span>
+    </div>
+  </section>
+
+</body>
+</html>

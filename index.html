@@ -414,18 +414,25 @@
 
     /* mobile nav */
     @media (max-width: 680px) {
-      nav { padding: 0 1.2rem; }
+      nav { padding: 0 1.2rem; flex-wrap: nowrap; }
       .nav-badge { display: none; }
       .nav-links {
+        display: none;
         position: fixed; top: var(--nav-h); left: 0; right: 0;
         flex-direction: column; gap: 0;
         background: rgba(5, 12, 26, 0.97);
         border-bottom: 1px solid var(--card-b);
-        transform: translateY(-110%);
-        transition: transform 0.3s ease;
         padding: 1rem 0;
+        z-index: 99;
       }
-      .nav-links.open { transform: translateY(0); }
+      .nav-links.open {
+        display: flex;
+        animation: navSlideDown 0.22s ease;
+      }
+      @keyframes navSlideDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
       .nav-links li { padding: 0.9rem 2.5rem; }
       .nav-hamburger { display: flex; }
       .sound-btn { cursor: pointer; margin-left: auto; margin-right: 0.6rem; }
@@ -1817,9 +1824,8 @@
       </p>
       <!-- Replace with your actual email -->
       <a class="contact-email" href="mailto:your@email.com">your@email.com</a>
-      <!-- Replace # with your CV/resume file path or Google Drive link -->
       <div style="margin-bottom:1.5rem;">
-        <a href="#resume" download style="font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:0.12em;color:var(--muted);border:1px solid var(--card-b);padding:0.55rem 1.2rem;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='var(--orange)';this.style.borderColor='var(--orange)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--card-b)'">
+        <a href="resume.html" download="Taha_Resume.html" style="font-family:'Orbitron','Courier New',monospace;font-size:0.65rem;letter-spacing:0.12em;color:var(--muted);border:1px solid var(--card-b);padding:0.55rem 1.2rem;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='var(--orange)';this.style.borderColor='var(--orange)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--card-b)'">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-5-5 1.4-1.4 2.6 2.6V4h2v8.2l2.6-2.6L17 11l-5 5zm-7 4v-2h14v2H5z"/></svg>
           DOWNLOAD CV
         </a>
@@ -1881,8 +1887,6 @@
           <span><strong>GENRE</strong> Boomer Shooter · FPS</span>
           <span><strong>PLATFORM</strong> Steam (PC)</span>
           <span><strong>INSPIRATIONS</strong> Doom · Quake · Forgive Me Father 2</span>
-          <!-- Replace # with your actual Steam wishlist URL when live -->
-          <span><a href="#steam-wishlist" style="color:var(--orange);font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:0.1em;text-decoration:none;" target="_blank">WISHLIST ON STEAM →</a></span>
         </div>
       </div>
 
