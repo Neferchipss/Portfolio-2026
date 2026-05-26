@@ -414,6 +414,8 @@
 
     /* mobile nav */
     @media (max-width: 680px) {
+      nav { padding: 0 1.2rem; }
+      .nav-badge { display: none; }
       .nav-links {
         position: fixed; top: var(--nav-h); left: 0; right: 0;
         flex-direction: column; gap: 0;
@@ -426,6 +428,7 @@
       .nav-links.open { transform: translateY(0); }
       .nav-links li { padding: 0.9rem 2.5rem; }
       .nav-hamburger { display: flex; }
+      .sound-btn { cursor: pointer; margin-left: auto; margin-right: 0.6rem; }
     }
 
     /* ─── HERO ─── */
@@ -1516,7 +1519,7 @@
 
       <div class="project-card">
         <div class="card-thumb" style="background:linear-gradient(135deg,#0a1a00 0%,#1a2e00 100%);position:relative;">
-          <img src="assets/Vile/Cover.png" alt="Vile" loading="lazy" onerror="this.style.display='none'">
+          <img src="assets/vile/cover.png" alt="Vile" loading="lazy" onerror="this.style.display='none'">
           <span class="card-badge badge-browser">BROWSER</span>
         </div>
         <div class="card-body">
@@ -1574,7 +1577,7 @@
 
       <div class="project-card">
         <div class="card-thumb" style="background:linear-gradient(135deg,#1a0000 0%,#0a0000 100%);position:relative;">
-          <img src="assets/Project%20Anomaly/Cover.png" alt="Project Anomaly" loading="lazy" onerror="this.style.display='none'">
+          <img src="assets/project-anomaly/cover.png" alt="Project Anomaly" loading="lazy" onerror="this.style.display='none'">
           <span class="card-badge badge-wip">IN DEV</span>
         </div>
         <div class="card-body">
@@ -1587,7 +1590,7 @@
 
       <div class="project-card">
         <div class="card-thumb" style="background:linear-gradient(135deg,#1a0f20 0%,#2e1a3a 100%);position:relative;">
-          <img src="assets/env%20design/Sanctuary/cover.png" alt="Sanctuary" loading="lazy" onerror="this.style.display='none'">
+          <img src="assets/env-design/sanctuary/cover.png" alt="Sanctuary" loading="lazy" onerror="this.style.display='none'">
           <span class="card-badge badge-art">3D / CONCEPT</span>
         </div>
         <div class="card-body">
@@ -1600,7 +1603,7 @@
 
       <div class="project-card">
         <div class="card-thumb" style="background:linear-gradient(135deg,#0a1020 0%,#0f1e30 100%);position:relative;">
-          <img src="assets/env%20design/shahi%20karkhana/render.png" alt="Shahi Karkhana" loading="lazy" onerror="this.style.display='none'">
+          <img src="assets/env-design/shahi-karkhana/render.png" alt="Shahi Karkhana" loading="lazy" onerror="this.style.display='none'">
           <span class="card-badge badge-art">3D / CONCEPT</span>
         </div>
         <div class="card-body">
@@ -1613,7 +1616,7 @@
 
       <div class="project-card">
         <div class="card-thumb" style="background:linear-gradient(135deg,#1a0500 0%,#2a0800 100%);position:relative;">
-          <img src="assets/env%20design/metamorphose/1.png" alt="Metamorphose" loading="lazy" onerror="this.style.display='none'">
+          <img src="assets/env-design/metamorphose/1.png" alt="Metamorphose" loading="lazy" onerror="this.style.display='none'">
           <span class="card-badge badge-art">3D / CONCEPT</span>
         </div>
         <div class="card-body">
@@ -1626,7 +1629,7 @@
 
       <div class="project-card">
         <div class="card-thumb" style="background:linear-gradient(135deg,#001a18 0%,#002a26 100%);position:relative;">
-          <img src="assets/env%20design/Alien%20Caves/image.png" alt="Alien Caves" loading="lazy" onerror="this.style.display='none'">
+          <img src="assets/env-design/alien-caves/image.png" alt="Alien Caves" loading="lazy" onerror="this.style.display='none'">
           <span class="card-badge badge-art">3D / CONCEPT</span>
         </div>
         <div class="card-body">
@@ -1830,8 +1833,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M0 1.5C0 .672.672 0 1.5 0h21c.828 0 1.5.672 1.5 1.5v5.25c0 .412-.337.75-.75.75H.75A.75.75 0 0 1 0 6.75V1.5ZM3 9h2v6H3V9Zm4 0h2v6H7V9Zm4 0h2v6h-2V9Zm4 0h2v6h-2V9Zm4 0h2v6h-2V9ZM1.5 17.25h21a1.5 1.5 0 0 1 0 3h-21a1.5 1.5 0 0 1 0-3Z"/></svg>
           ITCH.IO
         </a>
-        <!-- Replace href with your GitHub URL -->
-        <a class="social-link" href="#github" target="_blank" rel="noopener">
+        <a class="social-link" href="https://github.com/Neferchipss" target="_blank" rel="noopener">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.11.793-.26.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
           GITHUB
         </a>
@@ -1890,8 +1892,8 @@
         <div>
           <div class="modal-section-title">TRAILER — GODOT BUILD</div>
           <div class="modal-video-wrap">
-            <video id="trailerVideo" controls preload="metadata" poster="assets/Project%20Anomaly/Cover.png">
-              <source src="assets/Project%20Anomaly/trailer/trailer_web.mp4" type="video/mp4">
+            <video id="trailerVideo" controls preload="metadata" poster="assets/project-anomaly/cover.png">
+              <source src="assets/project-anomaly/trailer/trailer_web.mp4" type="video/mp4">
             </video>
           </div>
         </div>
@@ -1908,7 +1910,7 @@
               </div>
               <div class="modal-video-wrap">
                 <video controls preload="metadata">
-                  <source src="assets/Project%20Anomaly/clips/clip1_movement_weapons_web.mp4" type="video/mp4">
+                  <source src="assets/project-anomaly/clips/clip1_movement_weapons_web.mp4" type="video/mp4">
                 </video>
               </div>
               <p class="pclip-desc">First pass at player locomotion and pistol feel inside the Unreal Engine 5 prototype. Grid-room test environment with HUD and health system active.</p>
@@ -1921,7 +1923,7 @@
               </div>
               <div class="modal-video-wrap">
                 <video controls preload="metadata">
-                  <source src="assets/Project%20Anomaly/clips/clip2_enemy_ai_web.mp4" type="video/mp4">
+                  <source src="assets/project-anomaly/clips/clip2_enemy_ai_web.mp4" type="video/mp4">
                 </video>
               </div>
               <p class="pclip-desc">AI pathfinding and attack system in action — debug rays show enemy targeting logic. Two armoured enemy types in-frame, plus an early centaur variant on elevated geometry.</p>
@@ -1934,7 +1936,7 @@
               </div>
               <div class="modal-video-wrap">
                 <video controls preload="metadata">
-                  <source src="assets/Project%20Anomaly/clips/clip3_godot_combat_web.mp4" type="video/mp4">
+                  <source src="assets/project-anomaly/clips/clip3_godot_combat_web.mp4" type="video/mp4">
                 </video>
               </div>
               <p class="pclip-desc">Centaur enemy type with ranged attack tested in the Unreal prototype — showcasing enemy variety and combat loop under different encounter setups.</p>
@@ -1947,7 +1949,7 @@
               </div>
               <div class="modal-video-wrap">
                 <video controls preload="metadata">
-                  <source src="assets/Project%20Anomaly/clips/clip4_rage_mode_dash_web.mp4" type="video/mp4">
+                  <source src="assets/project-anomaly/clips/clip4_rage_mode_dash_web.mp4" type="video/mp4">
                 </video>
               </div>
               <p class="pclip-desc">Rage Mode combat escalation mechanic triggering in-engine, plus dash ability tested across an open traversal space — both prototyped in Unreal before the port.</p>
@@ -2044,7 +2046,7 @@
         desc: "A 2D survival platformer set in a hostile, overgrown world. Navigate escalating threats, manage scarce resources, and survive the echoes of something ancient.",
         tags: ["technical", "level-design", "game-design"],
         tagLabels: { "technical": "Technical", "level-design": "Level Design", "game-design": "Game Design" },
-        img: "assets/Vile/Cover.png",
+        img: "assets/vile/cover.png",
         gradient: "linear-gradient(135deg, #0a1a00 0%, #1a2e00 100%)",
         url: "https://nefer-owo7.itch.io/vile",
         cta: "PLAY IN BROWSER",
@@ -2090,7 +2092,7 @@
         desc: "A dark action game in active development in Godot 4 — heading to Steam. Wishlist now.",
         tags: ["technical", "game-design", "level-design"],
         tagLabels: { "technical": "Technical", "game-design": "Game Design", "level-design": "Level Design" },
-        img: "assets/Project%20Anomaly/Cover.png",
+        img: "assets/project-anomaly/cover.png",
         gradient: "linear-gradient(135deg, #1a0000 0%, #0a0000 100%)",
         url: null,
         cta: "VIEW DETAILS",
@@ -2101,7 +2103,7 @@
         desc: "An opulent interior built within a lotus-shaped architectural form. Eight distinct rooms — library, sitting room, garden alcove, and grand hall — flow through ornate arched doorways in a single unified structure.",
         tags: ["environment"],
         tagLabels: { "environment": "Environment" },
-        img: "assets/env%20design/Sanctuary/cover.png",
+        img: "assets/env-design/sanctuary/cover.png",
         gradient: "linear-gradient(135deg, #1a0f20 0%, #2e1a3a 100%)",
         url: null,
         cta: "VIEW GALLERY",
@@ -2113,7 +2115,7 @@
         desc: "A Mughal-era royal workshop district reconstructed in 3D — artisan stalls, craft tools, and a mosque backdrop. Presented as a split render/wireframe to expose the modelling and composition process.",
         tags: ["environment"],
         tagLabels: { "environment": "Environment" },
-        img: "assets/env%20design/shahi%20karkhana/render.png",
+        img: "assets/env-design/shahi-karkhana/render.png",
         gradient: "linear-gradient(135deg, #0a1020 0%, #0f1e30 100%)",
         url: null,
         cta: "VIEW GALLERY",
@@ -2125,7 +2127,7 @@
         desc: "In-engine dark fantasy environment design for an isometric game. Stone corridors lit by amber doorways give way to crimson-soaked chambers anchored by imposing statue forms.",
         tags: ["environment", "level-design"],
         tagLabels: { "environment": "Environment", "level-design": "Level Design" },
-        img: "assets/env%20design/metamorphose/1.png",
+        img: "assets/env-design/metamorphose/1.png",
         gradient: "linear-gradient(135deg, #1a0500 0%, #2a0800 100%)",
         url: null,
         cta: "VIEW GALLERY",
@@ -2137,7 +2139,7 @@
         desc: "Concept art for a bioluminescent subterranean world — Roman ruin fragments rest on floating rock platforms beneath alien cave formations. A lone figure establishes the sense of scale. Includes greyscale value study.",
         tags: ["environment"],
         tagLabels: { "environment": "Environment" },
-        img: "assets/env%20design/Alien%20Caves/image.png",
+        img: "assets/env-design/alien-caves/image.png",
         gradient: "linear-gradient(135deg, #001a18 0%, #002a26 100%)",
         url: null,
         cta: "VIEW GALLERY",
@@ -2151,30 +2153,30 @@
       'sanctuary': {
         name: 'SANCTUARY',
         images: [
-          { src: 'assets/env%20design/Sanctuary/full.png',          caption: 'EXTERIOR — LOTUS FORM' },
-          { src: 'assets/env%20design/Sanctuary/all-views.png',     caption: 'INTERIOR — ALL ROOMS' },
-          { src: 'assets/env%20design/Sanctuary/front_section.png', caption: 'FRONT SECTION' },
-          { src: 'assets/env%20design/Sanctuary/front_wire.png',    caption: 'WIREFRAME' },
+          { src: 'assets/env-design/sanctuary/full.png',          caption: 'EXTERIOR — LOTUS FORM' },
+          { src: 'assets/env-design/sanctuary/all-views.png',     caption: 'INTERIOR — ALL ROOMS' },
+          { src: 'assets/env-design/sanctuary/front_section.png', caption: 'FRONT SECTION' },
+          { src: 'assets/env-design/sanctuary/front_wire.png',    caption: 'WIREFRAME' },
         ]
       },
       'shahi-karkhana': {
         name: 'SHAHI KARKHANA',
         images: [
-          { src: 'assets/env%20design/shahi%20karkhana/render.png', caption: 'FULL SCENE — RENDER / WIREFRAME SPLIT' },
+          { src: 'assets/env-design/shahi-karkhana/render.png', caption: 'FULL SCENE — RENDER / WIREFRAME SPLIT' },
         ]
       },
       'metamorphose': {
         name: 'METAMORPHOSE',
         images: [
-          { src: 'assets/env%20design/metamorphose/1.png', caption: 'SCENE 01 — THE DOOR' },
-          { src: 'assets/env%20design/metamorphose/2.png', caption: 'SCENE 02 — THE STATUE' },
+          { src: 'assets/env-design/metamorphose/1.png', caption: 'SCENE 01 — THE DOOR' },
+          { src: 'assets/env-design/metamorphose/2.png', caption: 'SCENE 02 — THE STATUE' },
         ]
       },
       'alien-caves': {
         name: 'ALIEN CAVES',
         images: [
-          { src: 'assets/env%20design/Alien%20Caves/image.png',      caption: 'FINAL COLOUR' },
-          { src: 'assets/env%20design/Alien%20Caves/greyscale.jpeg', caption: 'VALUE STUDY' },
+          { src: 'assets/env-design/alien-caves/image.png',      caption: 'FINAL COLOUR' },
+          { src: 'assets/env-design/alien-caves/greyscale.jpeg', caption: 'VALUE STUDY' },
         ]
       }
     };
