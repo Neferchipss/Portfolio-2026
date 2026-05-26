@@ -1822,8 +1822,7 @@
         Open to game dev roles, freelance projects, and collaborations.<br/>
         Drop me a line — let's make something worth playing.
       </p>
-      <!-- Replace with your actual email -->
-      <a class="contact-email" href="mailto:your@email.com">your@email.com</a>
+
       <div style="margin-bottom:1.5rem;">
         <a href="resume.html" download="Taha_Resume.html" style="font-family:'Orbitron','Courier New',monospace;font-size:0.65rem;letter-spacing:0.12em;color:var(--muted);border:1px solid var(--card-b);padding:0.55rem 1.2rem;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='var(--orange)';this.style.borderColor='var(--orange)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--card-b)'">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-5-5 1.4-1.4 2.6 2.6V4h2v8.2l2.6-2.6L17 11l-5 5zm-7 4v-2h14v2H5z"/></svg>
@@ -2511,7 +2510,6 @@
 
     function beepAch() {
       if (!soundOn || !audioCtx) return;
-      if (audioCtx.state === 'suspended') { audioCtx.resume().then(beepAch); return; }
       try {
         const t = audioCtx.currentTime;
         [[440, 0, 0.1], [550, 0.1, 0.1], [660, 0.2, 0.1], [880, 0.32, 0.12]].forEach(([freq, delay, vol]) => {
@@ -2564,17 +2562,16 @@
     let soundOn = true;
     let audioCtx = null;
 
-    document.addEventListener('click', function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-      }
-      document.removeEventListener('click', initAudio);
-    }, { once: true });
+    function ensureAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state !== 'running') audioCtx.resume();
+    }
+    ['click', 'touchstart', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, ensureAudio, { passive: true });
+    });
 
     function beep(freq, dur, vol) {
       if (!soundOn || !audioCtx) return;
-      if (audioCtx.state === 'suspended') { audioCtx.resume().then(() => beep(freq, dur, vol)); return; }
       try {
         const t = audioCtx.currentTime;
         const o = audioCtx.createOscillator();
@@ -2600,9 +2597,8 @@
         soundOn = !soundOn;
         updateSoundIcon();
         if (soundOn) {
-          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const startBeep = () => beep(880, 0.18, 0.12);
-          audioCtx.state === 'suspended' ? audioCtx.resume().then(startBeep) : startBeep();
+          ensureAudio();
+          beep(880, 0.18, 0.12);
         }
       });
     }
@@ -2645,40 +2641,33 @@
     const bootBar = document.getElementById('bootBar');
     const bootTxt = document.getElementById('bootStatus');
 
-    const isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const steps = [
+      [15,  'LOADING ASSETS...'],
+      [35,  'INITIALIZING SYSTEMS...'],
+      [60,  'ESTABLISHING CONNECTION...'],
+      [80,  'RENDERING ENVIRONMENT...'],
+      [100, 'READY.']
+    ];
 
-    if (isMobileDevice) {
-      bootEl.remove();
-      scrambleHeroName();
-    } else {
-      const steps = [
-        [15,  'LOADING ASSETS...'],
-        [35,  'INITIALIZING SYSTEMS...'],
-        [60,  'ESTABLISHING CONNECTION...'],
-        [80,  'RENDERING ENVIRONMENT...'],
-        [100, 'READY.']
-      ];
-
-      let si = 0;
-      function bootStep() {
-        try {
-          if (si >= steps.length) {
-            setTimeout(() => {
-              bootEl.classList.add('out');
-              setTimeout(() => { bootEl.remove(); scrambleHeroName(); }, 800);
-            }, 300);
-            return;
-          }
-          const [pct, label] = steps[si++];
-          bootBar.style.width = pct + '%';
-          bootTxt.textContent = label;
-          setTimeout(bootStep, pct === 100 ? 400 : 380);
-        } catch(e) {
-          if (bootEl && bootEl.parentNode) bootEl.remove();
+    let si = 0;
+    function bootStep() {
+      try {
+        if (si >= steps.length) {
+          setTimeout(() => {
+            bootEl.classList.add('out');
+            setTimeout(() => { bootEl.remove(); scrambleHeroName(); }, 800);
+          }, 300);
+          return;
         }
+        const [pct, label] = steps[si++];
+        bootBar.style.width = pct + '%';
+        bootTxt.textContent = label;
+        setTimeout(bootStep, pct === 100 ? 400 : 380);
+      } catch(e) {
+        if (bootEl && bootEl.parentNode) bootEl.remove();
       }
-      setTimeout(bootStep, 200);
     }
+    setTimeout(bootStep, 200);
   </script>
 </body>
 </html>
